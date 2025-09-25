@@ -1,0 +1,5 @@
+node_modules/
+setup.php
+config/
+package.json
+package-lock.json

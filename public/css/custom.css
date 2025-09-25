@@ -1,0 +1,28 @@
+/* @import "tailwindcss"; */
+
+/* @theme {
+  --
+} */
+
+.nav-underline {
+  position: relative;
+}
+
+.nav-underline::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background-color: black;
+  transition: width 0.3s ease;
+}
+
+.nav-underline:hover::after {
+  width: 100%;
+}
+
+.nav-underline.active::after {
+  width: 100%;
+}
