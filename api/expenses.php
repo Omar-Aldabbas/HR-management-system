@@ -48,7 +48,7 @@ if ($action === 'list') {
     if ($userRole === 'employee') {
         $stmt = $mysqli->prepare("SELECT * FROM expenses WHERE user_id=? ORDER BY created_at DESC");
         $stmt->bind_param("i", $userId);
-    } else { 
+    } else {
         $stmt = $mysqli->prepare("SELECT e.*, u.name AS user_name FROM expenses e JOIN users u ON e.user_id=u.id ORDER BY e.created_at DESC");
     }
     $stmt->execute();
@@ -62,20 +62,16 @@ if ($action === 'list') {
 
 if ($action === 'update') {
     $expenseId = $input['id'] ?? 0;
-    if (!$expenseId) {
-        $response['message'] = 'Expense ID is required';
-    } else {
-        
+    if ($expenseId) {
         if ($userRole === 'employee') {
             $amount = $input['amount'] ?? 0;
             $reason = trim($input['reason'] ?? '');
             $stmt = $mysqli->prepare("UPDATE expenses SET amount=?, reason=? WHERE id=? AND user_id=?");
             $stmt->bind_param("dsii", $amount, $reason, $expenseId, $userId);
-        } else { 
+        } else {
             $status = $input['status'] ?? '';
             if (!in_array($status, ['pending','approved','rejected'])) {
-                $response['message'] = 'Invalid status';
-                echo json_encode($response);
+                echo json_encode(['success' => false, 'message' => 'Invalid status']);
                 exit;
             }
             $stmt = $mysqli->prepare("UPDATE expenses SET status=? WHERE id=?");
@@ -86,17 +82,15 @@ if ($action === 'update') {
         } else {
             $response['message'] = 'Error updating expense';
         }
+    } else {
+        $response['message'] = 'Expense ID is required';
     }
 }
 
 if ($action === 'delete') {
-    if ($userRole !== 'employee') {
-        $response['message'] = 'Only employees can delete expenses';
-    } else {
+    if ($userRole === 'employee') {
         $expenseId = $input['id'] ?? 0;
-        if (!$expenseId) {
-            $response['message'] = 'Expense ID is required';
-        } else {
+        if ($expenseId) {
             $stmt = $mysqli->prepare("DELETE FROM expenses WHERE id=? AND user_id=?");
             $stmt->bind_param("ii", $expenseId, $userId);
             if ($stmt->execute()) {
@@ -104,7 +98,11 @@ if ($action === 'delete') {
             } else {
                 $response['message'] = 'Error deleting expense';
             }
+        } else {
+            $response['message'] = 'Expense ID is required';
         }
+    } else {
+        $response['message'] = 'Only employees can delete expenses';
     }
 }
 
