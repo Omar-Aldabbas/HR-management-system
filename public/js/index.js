@@ -16,71 +16,71 @@ async function safeFetch(url, data) {
 }
 
 
-const styleNav = () => {
-  document.querySelectorAll('.nav-btn, .mobile-nav-btn').forEach(btn => {
-    btn.classList.add('nav-underline');
+// const styleNav = () => {
+//   document.querySelectorAll('.nav-btn, .mobile-nav-btn').forEach(btn => {
+//     btn.classList.add('nav-underline');
 
-    const currentPage = window.location.pathname.split('/').pop().replace('.html','');
-    if (btn.dataset.page === currentPage) {
-      btn.classList.add('active');
-    }
-  });
-};
+//     const currentPage = window.location.pathname.split('/').pop().replace('.html','');
+//     if (btn.dataset.page === currentPage) {
+//       btn.classList.add('active');
+//     }
+//   });
+// };
 
-document.addEventListener('DOMContentLoaded', () => {
-  styleNav();
-});
+// document.addEventListener('DOMContentLoaded', () => {
+//   styleNav();
+// });
 
 
-function setupNav() {
-  try {
-    document.querySelectorAll('.nav-btn, .mobile-nav-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const page = btn.dataset.page;
-        window.location.href = `${page}.html`;
-      });
-    });
+// function setupNav() {
+//   try {
+//     document.querySelectorAll('.nav-btn, .mobile-nav-btn').forEach(btn => {
+//       btn.addEventListener('click', () => {
+//         const page = btn.dataset.page;
+//         window.location.href = `${page}.html`;
+//       });
+//     });
 
-    document.getElementById('notifications-btn').addEventListener('click', () => {
-      window.location.href = 'notifications.html';
-    });
+//     document.getElementById('notifications-btn').addEventListener('click', () => {
+//       window.location.href = 'notifications.html';
+//     });
 
-    document.getElementById('history-btn').addEventListener('click', () => {
-      window.location.href = 'history.html';
-    });
-  } catch (err) {
-    console.error('Navigation setup error:', err);
-  }
-}
+//     document.getElementById('history-btn').addEventListener('click', () => {
+//       window.location.href = 'history.html';
+//     });
+//   } catch (err) {
+//     console.error('Navigation setup error:', err);
+//   }
+// }
 
-async function populateUser() {
-  try {
-    const res = await fetch(`${apiBase}/personal-data.php`, {
-      method: 'GET',
-      credentials: 'include'
-    });
-    const data = await res.json();
+// async function populateUser() {
+//   try {
+//     const res = await fetch(`${apiBase}/personal-data.php`, {
+//       method: 'GET',
+//       credentials: 'include'
+//     });
+//     const data = await res.json();
 
-    if (!data.success) {
-      if (data.message === 'Not authenticated') window.location.href = 'auth.html';
-      return;
-    }
+//     if (!data.success) {
+//       if (data.message === 'Not authenticated') window.location.href = 'auth.html';
+//       return;
+//     }
 
-    const user = data.data;
-    document.getElementById('user-name').textContent = user.full_name || user.name || 'User';
-    document.getElementById('user-position').textContent = user.position || 'Employee';
+//     const user = data.data;
+//     document.getElementById('user-name').textContent = user.full_name || user.name || 'User';
+//     document.getElementById('user-position').textContent = user.position || 'Employee';
 
-    const avatarEl = document.getElementById('user-img');
-    if (avatarEl) {
-      const avatarPath = user.avatar
-        ? `http://localhost/HR-project/${user.avatar.replace(/^\/+/, '')}`
-        : 'https://via.placeholder.com/40';
-      avatarEl.src = avatarPath;
-    }
-  } catch (err) {
-    console.error('User fetch error:', err);
-  }
-}
+//     const avatarEl = document.getElementById('user-img');
+//     if (avatarEl) {
+//       const avatarPath = user.avatar
+//         ? `http://localhost/HR-project/${user.avatar.replace(/^\/+/, '')}`
+//         : 'https://via.placeholder.com/40';
+//       avatarEl.src = avatarPath;
+//     }
+//   } catch (err) {
+//     console.error('User fetch error:', err);
+//   }
+// }
 
 
 
@@ -152,7 +152,7 @@ async function populateNotifications() {
 
 
 document.addEventListener('DOMContentLoaded', () => {
-  setupNav();
+  // setupNav();
   populateUser();
   populateTasks();
   populateMeetings();

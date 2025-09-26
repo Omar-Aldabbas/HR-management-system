@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Expenses</title>
+    <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="css/custom.css" />
+    <script src="js/expenses.js" defer></script>
+    <script src="js/navigation.js" defer></script>
+  </head>
+  <body class="bg-gray-100 min-h-screen">
+    <main class="p-6 space-y-8">
+      <header>
+        <h1 class="text-2xl font-bold">Expense Summary</h1>
+        <p class="text-gray-600">Claim and see your expenses here.</p>
+      </header>
+
+      <section id="expense-stats" class="bg-white shadow rounded-lg p-6">
+        <h2 class="text-lg font-semibold mb-4">Total Expenses (This Month)</h2>
+        <div class="grid grid-cols-3 gap-4">
+          <div class="p-4 bg-gray-50 rounded-lg shadow text-center">
+            <h3 class="font-bold">All</h3>
+            <p id="total-all" class="text-xl font-semibold">0</p>
+          </div>
+          <div class="p-4 bg-yellow-50 rounded-lg shadow text-center">
+            <h3 class="font-bold">In Review</h3>
+            <p id="total-review" class="text-xl font-semibold">0</p>
+          </div>
+          <div class="p-4 bg-green-50 rounded-lg shadow text-center">
+            <h3 class="font-bold">Approved</h3>
+            <p id="total-approved" class="text-xl font-semibold">0</p>
+          </div>
+        </div>
+      </section>
+
+      <section id="add-expense" class="bg-white shadow rounded-lg p-6">
+        <h2 class="text-lg font-semibold mb-4">Add Expense</h2>
+        <form id="expense-form" class="space-y-4">
+          <div>
+            <label class="block text-sm font-medium">Amount</label>
+            <input
+              type="number"
+              step="0.01"
+              name="amount"
+              class="w-full p-2 border rounded"
+              required
+            />
+          </div>
+          <div>
+            <label class="block text-sm font-medium">Reason</label>
+            <textarea
+              name="reason"
+              class="w-full p-2 border rounded"
+              required
+            ></textarea>
+          </div>
+          <button
+            type="submit"
+            class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+          >
+            Submit Expense
+          </button>
+        </form>
+      </section>
+
+      <section class="bg-white shadow rounded-lg p-6">
+        <div class="flex gap-4 mb-4">
+          <button
+            class="filter-btn px-4 py-2 rounded bg-yellow-100"
+            data-status="pending"
+          >
+            Review (<span id="count-review">0</span>)
+          </button>
+          <button
+            class="filter-btn px-4 py-2 rounded bg-green-100"
+            data-status="approved"
+          >
+            Approved (<span id="count-approved">0</span>)
+          </button>
+          <button
+            class="filter-btn px-4 py-2 rounded bg-red-100"
+            data-status="rejected"
+          >
+            Rejected (<span id="count-rejected">0</span>)
+          </button>
+        </div>
+        <ul id="expense-list" class="space-y-3"></ul>
+      </section>
+    </main>
+  </body>
+</html>

@@ -45,8 +45,7 @@ if ($action === 'clock-in') {
         $stmt2 = $mysqli->prepare("INSERT INTO attendance (user_id, clock_in) VALUES (?, NOW())");
         $stmt2->bind_param("i", $user_id);
         if ($stmt2->execute()) {
-            $clockInTime = date("Y-m-d H:i:s");
-            $response = ['success' => true, 'clock_in' => $clockInTime];
+            $response = ['success' => true, 'clock_in' => date("Y-m-d H:i:s")];
         }
     } else {
         $response = ['success' => false, 'message' => 'Already clocked in'];
@@ -80,9 +79,8 @@ if ($action === 'clock-in') {
     $res = $stmt->get_result();
     if ($res && $res->num_rows === 1) {
         $attendance_id = $res->fetch_assoc()['id'];
-        $stmt2 = $mysqli->prepare("INSERT INTO breaks (attendance_id, start_time, break_type) VALUES (?, NOW(), ?)");
-        $type = $input['break_type'] ?? 'general';
-        $stmt2->bind_param("is", $attendance_id, $type);
+        $stmt2 = $mysqli->prepare("INSERT INTO breaks (attendance_id, start_time) VALUES (?, NOW())");
+        $stmt2->bind_param("i", $attendance_id);
         if ($stmt2->execute()) $response = ['success' => true];
     }
 } elseif ($action === 'break-end') {
@@ -95,6 +93,17 @@ if ($action === 'clock-in') {
         $stmt2 = $mysqli->prepare("UPDATE breaks SET end_time=NOW() WHERE id=?");
         $stmt2->bind_param("i", $break_id);
         if ($stmt2->execute()) $response = ['success' => true];
+    }
+} elseif ($action === 'check-break') {
+    $stmt = $mysqli->prepare("SELECT start_time FROM breaks b JOIN attendance a ON b.attendance_id=a.id WHERE a.user_id=? AND b.end_time IS NULL ORDER BY b.start_time DESC LIMIT 1");
+    $stmt->bind_param("i", $user_id);
+    $stmt->execute();
+    $res = $stmt->get_result();
+    if ($res && $res->num_rows === 1) {
+        $row = $res->fetch_assoc();
+        $response = ['success' => true, 'onBreak' => true, 'start_time' => $row['start_time']];
+    } else {
+        $response = ['success' => true, 'onBreak' => false];
     }
 } elseif ($action === 'history') {
     $stmt = $mysqli->prepare("
@@ -111,26 +120,18 @@ if ($action === 'clock-in') {
     $stmt->execute();
     $res = $stmt->get_result();
     $history = [];
-
     while ($row = $res->fetch_assoc()) {
-        $stmt2 = $mysqli->prepare("
-            SELECT break_type, start_time, end_time,
-                   TIMESTAMPDIFF(SECOND, start_time, IFNULL(end_time, NOW())) AS duration
-            FROM breaks
-            WHERE attendance_id = ?
-        ");
+        $stmt2 = $mysqli->prepare("SELECT start_time, end_time, TIMESTAMPDIFF(SECOND, start_time, IFNULL(end_time, NOW())) AS duration FROM breaks WHERE attendance_id = ?");
         $stmt2->bind_param("i", $row['id']);
         $stmt2->execute();
         $brRes = $stmt2->get_result();
         $breaks = [];
         $totalBreakSeconds = 0;
-
         while ($br = $brRes->fetch_assoc()) {
             $br['duration'] = (int)$br['duration'];
             $breaks[] = $br;
             $totalBreakSeconds += $br['duration'];
         }
-
         $history[] = [
             'date' => date("Y-m-d", strtotime($row['clock_in'])),
             'clock_in' => $row['clock_in'],
@@ -140,9 +141,7 @@ if ($action === 'clock-in') {
             'total_break_seconds' => $totalBreakSeconds
         ];
     }
-
     $response = ['success' => true, 'history' => $history];
-
 } elseif ($action === 'department' || $action === 'all') {
     $stmt = $mysqli->prepare("SELECT role, department_id FROM users WHERE id=?");
     $stmt->bind_param("i", $user_id);
@@ -154,15 +153,11 @@ if ($action === 'clock-in') {
         $stmt2->bind_param("i", $me['department_id']);
         $stmt2->execute();
         $res2 = $stmt2->get_result();
-        while ($row = $res2->fetch_assoc()) {
-            $employees[] = ['name' => $row['name'], 'status' => getUserStatus($mysqli, $row['id'])];
-        }
+        while ($row = $res2->fetch_assoc()) $employees[] = ['name' => $row['name'], 'status' => getUserStatus($mysqli, $row['id'])];
     }
     if ($action === 'all' && $me['role'] === 'hr') {
         $res2 = $mysqli->query("SELECT id, name FROM users WHERE role IN ('manager','employee')");
-        while ($row = $res2->fetch_assoc()) {
-            $employees[] = ['name' => $row['name'], 'status' => getUserStatus($mysqli, $row['id'])];
-        }
+        while ($row = $res2->fetch_assoc()) $employees[] = ['name' => $row['name'], 'status' => getUserStatus($mysqli, $row['id'])];
     }
     $response = ['success' => true, 'employees' => $employees];
 }
