@@ -4,67 +4,51 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Expenses</title>
-  <link
-    rel="stylesheet"
-    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
-  />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="css/custom.css" />
   <script src="js/expenses.js" defer></script>
   <script src="js/navigation.js" defer></script>
 </head>
-<body class="bg-gray-100 min-h-screen">
+<body class="bg-gray-100 text-gray-900 min-h-screen font-mono">
 
-  <main class="p-6 space-y-8">
+  <header class="bg-black text-white p-6 shadow-lg">
+    <h1 class="text-2xl font-bold tracking-widest text-center">EXPENSES</h1>
+    <p class="text-gray-300 text-center mt-1">Claim and view your expenses</p>
+  </header>
 
-    <header>
-      <h1 class="text-2xl font-bold">Expense Summary</h1>
-      <p class="text-gray-600">Claim and see your expenses here.</p>
-    </header>
+  <main class="container mx-auto p-6 space-y-8">
 
-    <section id="expense-stats" class="bg-white shadow rounded-lg p-6">
-      <h2 class="text-lg font-semibold mb-4">Total Expenses (This Month)</h2>
-      <div class="grid grid-cols-3 gap-4">
-        <div class="p-4 bg-gray-50 rounded-lg shadow text-center">
-          <h3 class="font-bold">All</h3>
-          <p id="total-all" class="text-xl font-semibold">0</p>
-        </div>
-        <div class="p-4 bg-yellow-50 rounded-lg shadow text-center">
-          <h3 class="font-bold">In Review</h3>
-          <p id="total-review" class="text-xl font-semibold">0</p>
-        </div>
-        <div class="p-4 bg-green-50 rounded-lg shadow text-center">
-          <h3 class="font-bold">Approved</h3>
-          <p id="total-approved" class="text-xl font-semibold">0</p>
-        </div>
+    <section id="expense-stats" class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+      <div class="bg-white shadow rounded-xl p-6 text-center hover:shadow-xl transition">
+        <h3 class="font-semibold text-gray-600">All</h3>
+        <p id="total-all" class="text-2xl font-bold mt-2">0</p>
+      </div>
+      <div class="bg-white shadow rounded-xl p-6 text-center hover:shadow-xl transition">
+        <h3 class="font-semibold text-gray-600">In Review</h3>
+        <p id="total-review" class="text-2xl font-bold mt-2">0</p>
+      </div>
+      <div class="bg-white shadow rounded-xl p-6 text-center hover:shadow-xl transition">
+        <h3 class="font-semibold text-gray-600">Approved</h3>
+        <p id="total-approved" class="text-2xl font-bold mt-2">0</p>
       </div>
     </section>
 
-    <section id="role-based-section" class="bg-white shadow rounded-lg p-6">
-    </section>
+    <section id="role-based-section" class="bg-white shadow rounded-xl p-6 hover:shadow-xl transition"></section>
 
-    <section class="bg-white shadow rounded-lg p-6">
-      <div class="flex gap-4 mb-4">
-        <button
-          class="filter-btn px-4 py-2 rounded bg-yellow-100"
-          data-status="pending"
-        >
+    <section class="bg-white shadow rounded-xl p-6 hover:shadow-xl transition">
+      <div class="flex flex-wrap justify-center gap-4 mb-4">
+        <button class="filter-btn px-6 py-2 bg-black text-white font-semibold hover:bg-gray-900 rounded-lg transition">
           Review (<span id="count-review">0</span>)
         </button>
-        <button
-          class="filter-btn px-4 py-2 rounded bg-green-100"
-          data-status="approved"
-        >
+        <button class="filter-btn px-6 py-2 bg-gray-800 text-white font-semibold hover:bg-gray-700 rounded-lg transition">
           Approved (<span id="count-approved">0</span>)
         </button>
-        <button
-          class="filter-btn px-4 py-2 rounded bg-red-100"
-          data-status="rejected"
-        >
+        <button class="filter-btn px-6 py-2 bg-red-700 text-white font-semibold hover:bg-red-600 rounded-lg transition">
           Rejected (<span id="count-rejected">0</span>)
         </button>
       </div>
-      <ul id="expense-list" class="space-y-3"></ul>
+      <ul id="expense-list" class="space-y-4"></ul>
     </section>
 
   </main>

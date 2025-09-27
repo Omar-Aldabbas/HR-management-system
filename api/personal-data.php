@@ -40,7 +40,7 @@ try {
             $response['message'] = 'User not found';
         }
     } elseif ($method === 'POST') {
-        if ($user_role !== 'employee') throw new Exception('You cannot update personal info');
+        if (!in_array($user_role, ['employee','manager','hr','admin'])) throw new Exception('You cannot update personal info');
 
         $full_name   = trim($_POST['full_name'] ?? '');
         $email       = trim($_POST['email'] ?? '');
@@ -52,7 +52,7 @@ try {
         $postal_code = trim($_POST['postal_code'] ?? '');
         $avatarPath  = null;
 
-        if (!$full_name || !$email) throw new Exception('Full name and email are required');
+        if (!$full_name || !$email) throw new Exception('Full name and email cannot be empty');
         if (!filter_var($email, FILTER_VALIDATE_EMAIL)) throw new Exception('Invalid email');
 
         if (!empty($_FILES['avatar']['name'])) {

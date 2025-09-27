@@ -17,7 +17,6 @@ async function safeFetch(url, data = {}, method = 'GET', isFormData = false) {
     const res = await fetch(url, options);
     return await res.json();
   } catch (err) {
-    console.error('Fetch error:', err);
     return { success: false, message: 'Network error' };
   }
 }
@@ -30,21 +29,16 @@ function populateFormFields(data) {
   });
   const avatar = document.getElementById('avatar-preview');
   if (data.avatar && avatar) avatar.src = 'http://localhost/HR-project/' + data.avatar;
-
-  const userName = document.getElementById('user-name');
-  const userPosition = document.getElementById('user-position');
-  if (userName) userName.textContent = data.full_name || 'User';
-  if (userPosition) userPosition.textContent = data.position || '';
 }
 
 function setFieldsEditable(editable) {
   document.querySelectorAll('#personal-form input').forEach(input => {
     if (!input.id.match(/department|position/)) {
       input.readOnly = !editable;
-      input.classList.toggle('bg-gray-100', !editable);
+      input.classList.toggle('bg-gray-50', !editable);
     }
   });
-  document.getElementById('avatar')?.toggleAttribute('disabled', !editable);
+  document.getElementById('change-avatar-btn')?.classList.toggle('hidden', !editable);
   document.getElementById('edit-btn')?.classList.toggle('hidden', editable);
   document.getElementById('cancel-btn')?.classList.toggle('hidden', !editable);
   document.getElementById('save-btn')?.classList.toggle('hidden', !editable);
@@ -73,15 +67,18 @@ async function submitChanges(e) {
   const formData = new FormData(form);
   formData.append('action', 'update');
 
-  if (!formData.get('full_name') || !formData.get('email')) return alert('Full name and email are required');
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.get('email'))) return alert('Invalid email');
+  const fullName = formData.get('full_name')?.trim();
+  const email = formData.get('email')?.trim();
+  if (!fullName || !email) return alert('Full name and email cannot be empty');
+  const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailPattern.test(email)) return alert('Invalid email');
 
   const res = await safeFetch(apiBase, formData, 'POST', true);
   if (res.success) {
-    alert(res.message || 'Updated successfully!');
     originalData = res.data;
     populateFormFields(res.data);
     setFieldsEditable(false);
+    alert(res.message || 'Updated successfully');
   } else {
     alert(res.message || 'Failed to update');
   }
@@ -89,6 +86,7 @@ async function submitChanges(e) {
 
 document.addEventListener('DOMContentLoaded', () => {
   fetchUserData();
+
   const avatarInput = document.getElementById('avatar');
   const avatarPreview = document.getElementById('avatar-preview');
   if (avatarInput && avatarPreview) {
@@ -101,6 +99,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
   }
+
   document.getElementById('edit-btn')?.addEventListener('click', () => setFieldsEditable(true));
   document.getElementById('cancel-btn')?.addEventListener('click', cancelEdit);
   document.getElementById('personal-form')?.addEventListener('submit', submitChanges);
