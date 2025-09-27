@@ -27,7 +27,7 @@ try {
     if ($method === 'GET') {
         $stmt = $mysqli->prepare("
             SELECT id, name AS full_name, email, phone, department, position,
-                   address, city, state, country, postal_code, avatar
+                   address, city, state, country, postal_code, avatar, role
             FROM users WHERE id=? LIMIT 1
         ");
         if (!$stmt) throw new Exception($mysqli->error);

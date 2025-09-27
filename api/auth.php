@@ -14,7 +14,6 @@ header('Content-Type: application/json');
 include '../config/config.php';
 
 $response = ['success' => false, 'message' => 'Invalid request'];
-
 $input = json_decode(file_get_contents('php://input'), true);
 $action = $input['action'] ?? '';
 
@@ -25,7 +24,6 @@ if ($action === 'check-session') {
         $stmt->execute();
         $result = $stmt->get_result();
         $user = $result->fetch_assoc();
-
         $response = [
             'success' => true,
             'loggedIn' => true,
@@ -37,10 +35,7 @@ if ($action === 'check-session') {
             ]
         ];
     } else {
-        $response = [
-            'success' => true,
-            'loggedIn' => false
-        ];
+        $response = ['success' => true, 'loggedIn' => false];
     }
     echo json_encode($response);
     exit;
@@ -60,7 +55,6 @@ if ($action === 'login') {
             $user = $result->fetch_assoc();
             if (password_verify($password, $user['password'])) {
                 session_regenerate_id(true);
-
                 $_SESSION['user_id'] = $user['id'];
                 $_SESSION['role'] = $user['role'];
                 $_SESSION['name'] = $user['name'];
@@ -121,12 +115,27 @@ if ($action === 'signup') {
         } else {
             $hashed = password_hash($password, PASSWORD_BCRYPT);
             $role = 'employee';
-            $stmt2 = $mysqli->prepare("INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)");
-            $stmt2->bind_param("ssss", $name, $email, $hashed, $role);
+
+            do {
+                $employee_id = 'EMP' . rand(1000, 9999);
+                $stmt_check = $mysqli->prepare("SELECT id FROM users WHERE employee_id=? LIMIT 1");
+                $stmt_check->bind_param("s", $employee_id);
+                $stmt_check->execute();
+                $result_check = $stmt_check->get_result();
+            } while ($result_check->num_rows > 0);
+
+            $stmt2 = $mysqli->prepare("INSERT INTO users (employee_id, name, email, password, role) VALUES (?, ?, ?, ?, ?)");
+            $stmt2->bind_param("sssss", $employee_id, $name, $email, $hashed, $role);
             if ($stmt2->execute()) {
                 $response = [
                     'success' => true,
-                    'message' => 'Account created. Please log in'
+                    'message' => 'Account created. Please log in',
+                    'user' => [
+                        'employee_id' => $employee_id,
+                        'name' => $name,
+                        'email' => $email,
+                        'role' => $role
+                    ]
                 ];
             } else {
                 $response['message'] = 'Error creating account';
@@ -142,7 +151,6 @@ if ($action === 'forgot') {
         $stmt->bind_param("s", $email);
         $stmt->execute();
         $result = $stmt->get_result();
-
         if ($result && $result->num_rows === 1) {
             $response = ['success' => true, 'message' => 'Password reset link sent (mock)'];
         } else {
@@ -160,7 +168,7 @@ if ($action === 'change-password') {
     }
 
     $currentPassword = $input['current_password'] ?? '';
-    $newPassword     = $input['new_password'] ?? '';
+    $newPassword = $input['new_password'] ?? '';
     $confirmPassword = $input['confirm_password'] ?? '';
 
     if (!$currentPassword || !$newPassword || !$confirmPassword) {
@@ -173,7 +181,6 @@ if ($action === 'change-password') {
         $stmt->execute();
         $result = $stmt->get_result();
         $user = $result->fetch_assoc();
-
         if (!$user || !password_verify($currentPassword, $user['password'])) {
             $response['message'] = 'Current password is incorrect';
         } else {
