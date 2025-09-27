@@ -1,4 +1,3 @@
-// const apiBase = "http://localhost/HR-project/api";
 
 async function safeFetch(url, data) {
   try {
@@ -68,11 +67,6 @@ const styleNav = () => {
     }
   });
 };
-
-// document.addEventListener('DOMContentLoaded', () => {
-//   styleNav();
-// });
-
 
 const getNavs = () => {
   const NAVS = document.getElementsByClassName("nav-btn");

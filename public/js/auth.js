@@ -26,7 +26,6 @@ async function postData(data) {
   }
 }
 
-// Switch forms
 document.getElementById('show-signup').addEventListener('click', e => {
   e.preventDefault();
   loginForm.classList.add('hidden');
@@ -55,16 +54,13 @@ document.getElementById('back-to-login2').addEventListener('click', e => {
   messageEl.classList.add('hidden');
 });
 
-// Check if already logged in
 (async function checkSession() {
   const res = await postData({ action: 'check-session' });
   if (res.loggedIn) {
-    // Default to index.html if redirect not set
     window.location.href = res.redirect || 'index.html';
   }
 })();
 
-// LOGIN
 loginForm.addEventListener('submit', async e => {
   e.preventDefault();
   const res = await postData({
@@ -78,7 +74,6 @@ loginForm.addEventListener('submit', async e => {
   }
 });
 
-// SIGNUP
 signupForm.addEventListener('submit', async e => {
   e.preventDefault();
   const res = await postData({
@@ -94,7 +89,6 @@ signupForm.addEventListener('submit', async e => {
   }
 });
 
-// FORGOT PASSWORD
 forgotForm.addEventListener('submit', async e => {
   e.preventDefault();
   const res = await postData({
