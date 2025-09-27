@@ -24,7 +24,6 @@ $action = $input['action'] ?? '';
 $userId = $_SESSION['user_id'];
 $userRole = $_SESSION['role'];
 
-// CREATE TARGET (Manager/Admin only)
 if ($action === 'create') {
     if (!in_array($userRole, ['manager','admin'])) {
         $response['message'] = 'Unauthorized';
@@ -49,12 +48,11 @@ if ($action === 'create') {
     }
 }
 
-// LIST TARGETS
 if ($action === 'list') {
     if ($userRole === 'employee') {
         $stmt = $mysqli->prepare("SELECT * FROM targets WHERE user_id=? ORDER BY deadline DESC");
         $stmt->bind_param("i", $userId);
-    } else { // manager/admin
+    } else { // manager or aadmin
         $stmt = $mysqli->prepare("SELECT t.*, u.name AS user_name FROM targets t JOIN users u ON t.user_id=u.id ORDER BY t.deadline DESC");
     }
     $stmt->execute();
@@ -66,7 +64,6 @@ if ($action === 'list') {
     $response = ['success' => true, 'targets' => $targets];
 }
 
-// UPDATE TARGET (Employee for progress, Manager/Admin for all fields)
 if ($action === 'update') {
     $targetId = $input['id'] ?? 0;
     if (!$targetId) {
@@ -96,7 +93,6 @@ if ($action === 'update') {
     }
 }
 
-// DELETE TARGET (Manager/Admin only)
 if ($action === 'delete') {
     if (!in_array($userRole, ['manager','admin'])) {
         $response['message'] = 'Unauthorized';

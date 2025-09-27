@@ -48,7 +48,7 @@ const desktopNav = () => {
 };
 const mobileNav = () => {
   return `
-  <nav class="fixed bottom-0 left-0 right-0 bg-white md:hidden shadow-inner flex justify-around py-3">
+  <nav class="sticky bottom-0 left-0 right-0 bg-white md:hidden shadow-inner flex justify-around py-3">
     <button class="nav-btn" data-page="index"><i class="fa-solid fa-house text-lg"></i></button>
     <button class="nav-btn" data-page="attendance"><i class="fa-solid fa-clock text-lg"></i></button>
     <button class="nav-btn" data-page="analytics"><i class="fa-solid fa-clipboard-check text-lg"></i></button>

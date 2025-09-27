@@ -26,7 +26,6 @@ if (!isset($_SESSION['user_id'])) {
 $user_id = $_SESSION['user_id'];
 $user_role = $_SESSION['role'];
 
-// Function to fetch attendance report
 function getAttendanceReport($mysqli, $filter_user_id = null, $month = null) {
     $query = "SELECT u.id, u.name, SUM(TIMESTAMPDIFF(MINUTE, a.clock_in, a.clock_out))/60 AS total_hours
               FROM attendance a
@@ -58,7 +57,6 @@ function getAttendanceReport($mysqli, $filter_user_id = null, $month = null) {
     return $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
 }
 
-// Function to fetch tasks report
 function getTasksReport($mysqli, $filter_user_id = null, $status = null) {
     $query = "SELECT u.id, u.name, t.status, COUNT(*) AS total_tasks
               FROM tasks t
@@ -90,7 +88,6 @@ function getTasksReport($mysqli, $filter_user_id = null, $status = null) {
     return $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
 }
 
-// Function to fetch expenses report
 function getExpensesReport($mysqli, $filter_user_id = null, $status = null) {
     $query = "SELECT u.id, u.name, e.status, SUM(e.amount) AS total_amount
               FROM expenses e
@@ -122,7 +119,6 @@ function getExpensesReport($mysqli, $filter_user_id = null, $status = null) {
     return $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
 }
 
-// Function to fetch leaves report
 function getLeavesReport($mysqli, $filter_user_id = null, $type = null) {
     $query = "SELECT u.id, u.name, l.type, COUNT(*) AS total_leaves
               FROM leaves l
@@ -154,7 +150,6 @@ function getLeavesReport($mysqli, $filter_user_id = null, $type = null) {
     return $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
 }
 
-// Function to fetch targets report
 function getTargetsReport($mysqli, $filter_user_id = null) {
     $query = "SELECT u.id, u.name, t.target_amount, t.achieved_amount
               FROM targets t
@@ -178,7 +173,6 @@ function getTargetsReport($mysqli, $filter_user_id = null) {
     return $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
 }
 
-// Handle report types
 $report_type = $input['report_type'] ?? '';
 $filter_user_id = $input['user_id'] ?? null;
 $status = $input['status'] ?? null;
@@ -186,7 +180,7 @@ $type = $input['type'] ?? null;
 $month = $input['month'] ?? null;
 
 if ($user_role === 'employee') {
-    $filter_user_id = $user_id; // employees can see only their own data
+    $filter_user_id = $user_id;  
 }
 
 switch ($report_type) {
