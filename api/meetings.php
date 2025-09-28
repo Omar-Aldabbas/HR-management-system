@@ -14,7 +14,7 @@ header('Content-Type: application/json');
 include '../config/config.php';
 
 if (!isset($_SESSION['user_id'])) {
-    echo json_encode(['success' => false, 'message' => 'Not logged in']);
+    echo json_encode(['success' => false, 'message' => 'Unauthorized', 'redirect' => 'auth.html']);
     exit;
 }
 

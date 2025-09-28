@@ -151,6 +151,7 @@ if ($action === 'forgot') {
         $stmt->bind_param("s", $email);
         $stmt->execute();
         $result = $stmt->get_result();
+       /// need to know how to use mailer 
         if ($result && $result->num_rows === 1) {
             $response = ['success' => true, 'message' => 'Password reset link sent (mock)'];
         } else {

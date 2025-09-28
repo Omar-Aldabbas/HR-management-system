@@ -12,7 +12,7 @@ header("Access-Control-Allow-Methods: POST, GET, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type");
 
 if (!isset($_SESSION['user_id'])) {
-    echo json_encode(['success' => false, 'message' => 'Not authenticated']);
+    echo json_encode(['success' => false, 'message' => 'Unauthorized', 'redirect' => 'auth.html']);
     exit;
 }
 

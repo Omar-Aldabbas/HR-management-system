@@ -13,15 +13,26 @@ header('Content-Type: application/json');
 
 include '../config/config.php';
 
+
+
+
 $response = ['success' => false, 'message' => 'Invalid request'];
 
 $input  = json_decode(file_get_contents('php://input'), true);
 $action = $input['action'] ?? '';
 
+// if (!isset($_SESSION['user_id'])) {
+//     echo json_encode(['success' => false, 'message' => 'Not authenticated']);
+//     exit;
+// }
+
+
+
 if (!isset($_SESSION['user_id'])) {
-    echo json_encode(['success' => false, 'message' => 'Not authenticated']);
+    echo json_encode(['success' => false, 'message' => 'Not authenticated', 'redirect' => 'auth.html']);
     exit;
 }
+
 
 $user_id   = (int) $_SESSION['user_id'];
 $user_role = $_SESSION['role'] ?? 'employee';

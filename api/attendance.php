@@ -13,16 +13,22 @@ header("Content-Type: application/json");
 
 include '../config/config.php';
 
-$user_id = $_SESSION['user_id'] ?? null;
-if (!$user_id) {
-    echo json_encode(['success' => false, 'message' => 'Unauthorized']);
+
+//New way to check if auth Same as !isset($_SESSION['user_id'])
+// $user_id = $_SESSION['user_id'] ?? null;
+// if (!$user_id) {
+//     echo json_encode(['success' => false, 'message' => 'Unauthorized']);
+//     exit;
+// }
+
+if (!isset($_SESSION['user_id'])) {
+    echo json_encode(['success' => false, 'message' => 'UnAuthorized', 'redirect' => 'auth.html']);
     exit;
 }
 
-$input = json_decode(file_get_contents("php://input"), true) ?? [];
-$action = $_GET['action'] ?? $input['action'] ?? '';
-
 $response = ['success' => false, 'message' => 'Invalid request'];
+$input = json_decode(file_get_contents("php://input"), true);
+$action = $input['action'] ?? '';
 
 function getUserStatus($mysqli, $uid) {
     $stmt = $mysqli->prepare("SELECT clock_in, clock_out FROM attendance WHERE user_id=? ORDER BY clock_in DESC LIMIT 1");

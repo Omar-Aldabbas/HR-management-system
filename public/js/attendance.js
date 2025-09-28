@@ -1,16 +1,13 @@
 const apiBase = "http://localhost/HR-project/api";
 
-async function safeFetch(url, data = {}, method = "POST") {
+async function safeFetch(endpoint, data = {}) {
   try {
-    const options = { method, credentials: "include" };
-    if (method === "POST") {
-      options.headers = { "Content-Type": "application/json" };
-      options.body = JSON.stringify(data);
-    } else if (method === "GET") {
-      const params = new URLSearchParams(data).toString();
-      url += params ? `?${params}` : "";
-    }
-    const res = await fetch(url, options);
+    const res = await fetch(`${apiBase}/${endpoint}`, {
+      method: "POST",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+    });
     return await res.json();
   } catch {
     return { success: false, message: "Network error" };
@@ -18,7 +15,7 @@ async function safeFetch(url, data = {}, method = "POST") {
 }
 
 async function populateUser() {
-  const res = await safeFetch(`${apiBase}/personal-data.php`, {}, "GET");
+  const res = await safeFetch("personal-data.php", { action: "get-user" });
   if (!res.success) {
     if (res.message === "Not authenticated") window.location.href = "auth.html";
     return;
@@ -41,15 +38,6 @@ function setupNavigation() {
     });
   });
 }
-
-// function setupLogout() {
-//   const btn = document.getElementById("logout-btn");
-//   if (!btn) return;
-//   btn.addEventListener("click", async () => {
-//     const res = await safeFetch(`${apiBase}/auth.php`, { action: "logout" });
-//     if (res.success) window.location.href = "auth.html";
-//   });
-// }
 
 let clockInTime = null;
 let timerInterval = null;
@@ -115,7 +103,7 @@ function calculateTotalHours(clockIn, clockOut, breakSeconds = 0) {
 }
 
 async function sendAction(action) {
-  const res = await safeFetch(`${apiBase}/attendance.php`, { action }, "GET");
+  const res = await safeFetch("attendance.php", { action });
   if (!res.success) return alert(res.message || "Action failed");
 
   const btnCheckIn = document.getElementById("btn-checkin");
@@ -172,11 +160,7 @@ async function sendAction(action) {
 }
 
 async function fetchAttendanceHistory(limit = 2) {
-  const res = await safeFetch(
-    `${apiBase}/attendance.php?action=history`,
-    {},
-    "GET"
-  );
+  const res = await safeFetch("attendance.php", { action: "history" });
   if (!res.success) return;
 
   const container = document.getElementById("history-container");
@@ -215,18 +199,16 @@ async function fetchAttendanceHistory(limit = 2) {
     if (container._collapsed) {
       container._allItems.forEach((li) => list.appendChild(li));
     } else {
-      container._allItems.slice(0, limit).forEach((li) => list.appendChild(li));
+      container._allItems.slice(0, limit).forEach((li) =>
+        list.appendChild(li)
+      );
     }
     container._collapsed = !container._collapsed;
   };
 }
 
 async function restoreAttendanceState() {
-  const res = await safeFetch(
-    `${apiBase}/attendance.php`,
-    { action: "history" },
-    "GET"
-  );
+  const res = await safeFetch("attendance.php", { action: "history" });
   if (!res.success || !res.history.length) return;
   const last = res.history[0];
   const btnCheckIn = document.getElementById("btn-checkin");
@@ -240,11 +222,7 @@ async function restoreAttendanceState() {
     btnCheckIn?.classList.add("hidden");
     btnCheckOut?.classList.remove("hidden");
     btnBreak?.classList.remove("hidden");
-    const breakRes = await safeFetch(
-      `${apiBase}/attendance.php`,
-      { action: "check-break" },
-      "GET"
-    );
+    const breakRes = await safeFetch("attendance.php", { action: "check-break" });
     if (breakRes.success && breakRes.onBreak) {
       isOnBreak = true;
       breakStartTime = new Date(breakRes.start_time.replace(" ", "T"));
@@ -265,12 +243,10 @@ function updateDateTime() {
 document.addEventListener("DOMContentLoaded", () => {
   populateUser();
   setupNavigation();
-  // setupLogout();
   updateDateTime();
   setInterval(updateDateTime, 1000);
   fetchAttendanceHistory();
   restoreAttendanceState();
-  fetchAttendanceHistory(2);
 
   document
     .getElementById("btn-checkin")
