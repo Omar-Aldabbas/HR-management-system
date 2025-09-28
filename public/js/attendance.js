@@ -1,8 +1,16 @@
 const apiBase = "http://localhost/HR-project/api";
+const attendanceApi = `${apiBase}/attendance.php`;
+const userApi = `${apiBase}/personal-data.php`;
 
-async function safeFetch(endpoint, data = {}) {
+let clockInTime = null;
+let timerInterval = null;
+let totalBreakSeconds = 0;
+let isOnBreak = false;
+let breakStartTime = null;
+
+async function safeFetch(url, data = {}) {
   try {
-    const res = await fetch(`${apiBase}/${endpoint}`, {
+    const res = await fetch(url, {
       method: "POST",
       credentials: "include",
       headers: { "Content-Type": "application/json" },
@@ -15,23 +23,19 @@ async function safeFetch(endpoint, data = {}) {
 }
 
 async function populateUser() {
-  const res = await safeFetch("personal-data.php", { action: "get-user" });
+  const res = await safeFetch(userApi, { action: "get-user" });
   if (!res.success) {
-    if (res.message === "Not authenticated") window.location.href = "auth.html";
+    if (res.redirect) window.location.href = res.redirect;
     return;
   }
   const user = res.data;
-  document.getElementById("user-name").textContent =
-    user.full_name || user.name || "User";
-  document.getElementById("user-position").textContent =
-    user.position || "Employee";
-  document.getElementById("user-img").src = user.avatar
-    ? `http://localhost/HR-project/${user.avatar}`
-    : "https://via.placeholder.com/100";
+  document.getElementById("user-name").textContent = user.full_name || user.name || "User";
+  document.getElementById("user-position").textContent = user.position || "Employee";
+  document.getElementById("user-img").src = user.avatar ? `${apiBase}/${user.avatar}` : "https://via.placeholder.com/100";
 }
 
 function setupNavigation() {
-  document.querySelectorAll(".nav-btn, .mobile-nav-btn").forEach((btn) => {
+  document.querySelectorAll(".nav-btn, .mobile-nav-btn").forEach(btn => {
     btn.addEventListener("click", () => {
       const page = btn.dataset.page;
       if (page) window.location.href = page + ".html";
@@ -39,59 +43,30 @@ function setupNavigation() {
   });
 }
 
-let clockInTime = null;
-let timerInterval = null;
-let totalBreakSeconds = 0;
-let isOnBreak = false;
-let breakStartTime = null;
-
 function updateTimerUI() {
   if (!clockInTime) return;
+
   const now = new Date();
-  let diff = (now.getTime() - clockInTime.getTime()) / 1000;
-  let breaks = totalBreakSeconds;
-  if (isOnBreak && breakStartTime)
-    breaks += (now.getTime() - breakStartTime.getTime()) / 1000;
-  diff -= breaks;
+  let diff = (now - clockInTime) / 1000;
+  if (isOnBreak && breakStartTime) diff -= (now - breakStartTime) / 1000;
+  diff -= totalBreakSeconds;
   if (diff < 0) diff = 0;
 
-  const hrs = Math.floor(diff / 3600);
-  const mins = Math.floor((diff % 3600) / 60);
-  const secs = Math.floor(diff % 60);
+  const hrs = String(Math.floor(diff / 3600)).padStart(2, "0");
+  const mins = String(Math.floor((diff % 3600) / 60)).padStart(2, "0");
+  const secs = String(Math.floor(diff % 60)).padStart(2, "0");
 
   const timerEl = document.getElementById("live-timer");
-  if (timerEl)
-    timerEl.textContent = `${hrs.toString().padStart(2, "0")}:${mins
-      .toString()
-      .padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
+  if (timerEl) timerEl.textContent = `${hrs}:${mins}:${secs}`;
 
-  const breaksElem = document.getElementById("session-breaks");
-  if (breaksElem)
-    breaksElem.textContent = `Breaks: ${Math.floor(breaks / 60)} mins`;
-
-  updateTodaySession(diff);
+  const breaksEl = document.getElementById("session-breaks");
+  if (breaksEl) breaksEl.textContent = `Breaks: ${Math.floor(totalBreakSeconds / 60)} mins`;
 }
 
 function startLiveTimer() {
-  if (!clockInTime) return;
   clearInterval(timerInterval);
   updateTimerUI();
   timerInterval = setInterval(updateTimerUI, 1000);
-}
-
-function updateTodaySession(diffSeconds) {
-  const statusEl = document.getElementById("session-status");
-  const clockInEl = document.getElementById("session-clockin");
-  const clockOutEl = document.getElementById("session-clockout");
-  if (!clockInTime) {
-    if (statusEl) statusEl.textContent = "No active session";
-    if (clockInEl) clockInEl.textContent = "";
-    if (clockOutEl) clockOutEl.textContent = "";
-    return;
-  }
-  if (statusEl) statusEl.textContent = "Active session";
-  if (clockInEl) clockInEl.textContent = `In: ${clockInTime.toLocaleString()}`;
-  if (clockOutEl) clockOutEl.textContent = "";
 }
 
 function calculateTotalHours(clockIn, clockOut, breakSeconds = 0) {
@@ -102,9 +77,30 @@ function calculateTotalHours(clockIn, clockOut, breakSeconds = 0) {
   return totalHrs.toFixed(2);
 }
 
+function updateTodaySession() {
+  const statusEl = document.getElementById("session-status");
+  const clockInEl = document.getElementById("session-clockin");
+  const clockOutEl = document.getElementById("session-clockout");
+
+  if (!clockInTime) {
+    if (statusEl) statusEl.textContent = "No active session";
+    if (clockInEl) clockInEl.textContent = "";
+    if (clockOutEl) clockOutEl.textContent = "";
+    return;
+  }
+
+  if (statusEl) statusEl.textContent = "Active session";
+  if (clockInEl) clockInEl.textContent = `In: ${clockInTime.toLocaleString()}`;
+  if (clockOutEl) clockOutEl.textContent = "";
+}
+
 async function sendAction(action) {
-  const res = await safeFetch("attendance.php", { action });
-  if (!res.success) return alert(res.message || "Action failed");
+  const res = await safeFetch(attendanceApi, { action });
+
+  if (!res.success) {
+    if (res.redirect) window.location.href = res.redirect;
+    else return alert(res.message || "Action failed");
+  }
 
   const btnCheckIn = document.getElementById("btn-checkin");
   const btnCheckOut = document.getElementById("btn-checkout");
@@ -124,11 +120,7 @@ async function sendAction(action) {
 
   if (action === "clock-out") {
     clearInterval(timerInterval);
-    const total = calculateTotalHours(
-      clockInTime,
-      res.clock_out,
-      totalBreakSeconds
-    );
+    const total = calculateTotalHours(clockInTime, res.clock_out, totalBreakSeconds);
     clockInTime = null;
     totalBreakSeconds = 0;
     isOnBreak = false;
@@ -137,9 +129,9 @@ async function sendAction(action) {
     btnCheckOut?.classList.add("hidden");
     btnBreak?.classList.add("hidden");
     if (totalHoursEl) totalHoursEl.textContent = total;
-    fetchAttendanceHistory();
-    updateTodaySession(0);
+    updateTodaySession();
     document.getElementById("live-timer").textContent = "00:00:00";
+    await fetchAttendanceHistory();
   }
 
   if (action === "break-start") {
@@ -150,8 +142,7 @@ async function sendAction(action) {
   }
 
   if (action === "break-end") {
-    if (breakStartTime)
-      totalBreakSeconds += Math.floor((new Date() - breakStartTime) / 1000);
+    if (breakStartTime) totalBreakSeconds += Math.floor((new Date() - breakStartTime) / 1000);
     isOnBreak = false;
     breakStartTime = null;
     btnBreak.textContent = "Break";
@@ -160,25 +151,18 @@ async function sendAction(action) {
 }
 
 async function fetchAttendanceHistory(limit = 2) {
-  const res = await safeFetch("attendance.php", { action: "history" });
+  const res = await safeFetch(attendanceApi, { action: "history" });
   if (!res.success) return;
 
-  const container = document.getElementById("history-container");
   const list = document.getElementById("history-list");
-  if (!list || !container) return;
+  if (!list) return;
   list.innerHTML = "";
 
-  const records = res.history;
-
-  container._allItems = records.map((item) => {
+  const records = res.history || [];
+  records.slice(0, limit).forEach(item => {
     const li = document.createElement("li");
-    li.className =
-      "bg-white p-3 rounded-lg shadow flex justify-between items-center";
-    const total = calculateTotalHours(
-      item.clock_in,
-      item.clock_out,
-      item.total_break_seconds || 0
-    );
+    li.className = "bg-white p-3 rounded-lg shadow flex justify-between items-center";
+    const total = calculateTotalHours(item.clock_in, item.clock_out, item.total_break_seconds || 0);
     li.innerHTML = `
       <div>
         <p class="font-semibold">${item.date}</p>
@@ -188,28 +172,14 @@ async function fetchAttendanceHistory(limit = 2) {
       </div>
       <div>Total: ${total} hrs</div>
     `;
-    return li;
+    list.appendChild(li);
   });
-
-  container._allItems.slice(0, limit).forEach((li) => list.appendChild(li));
-  container._collapsed = true;
-
-  container.onclick = () => {
-    list.innerHTML = "";
-    if (container._collapsed) {
-      container._allItems.forEach((li) => list.appendChild(li));
-    } else {
-      container._allItems.slice(0, limit).forEach((li) =>
-        list.appendChild(li)
-      );
-    }
-    container._collapsed = !container._collapsed;
-  };
 }
 
 async function restoreAttendanceState() {
-  const res = await safeFetch("attendance.php", { action: "history" });
+  const res = await safeFetch(attendanceApi, { action: "history" });
   if (!res.success || !res.history.length) return;
+
   const last = res.history[0];
   const btnCheckIn = document.getElementById("btn-checkin");
   const btnCheckOut = document.getElementById("btn-checkout");
@@ -222,7 +192,8 @@ async function restoreAttendanceState() {
     btnCheckIn?.classList.add("hidden");
     btnCheckOut?.classList.remove("hidden");
     btnBreak?.classList.remove("hidden");
-    const breakRes = await safeFetch("attendance.php", { action: "check-break" });
+
+    const breakRes = await safeFetch(attendanceApi, { action: "check-break" });
     if (breakRes.success && breakRes.onBreak) {
       isOnBreak = true;
       breakStartTime = new Date(breakRes.start_time.replace(" ", "T"));
@@ -234,30 +205,23 @@ async function restoreAttendanceState() {
 
 function updateDateTime() {
   const now = new Date();
-  document.getElementById("current-date").textContent =
-    now.toLocaleDateString();
-  document.getElementById("current-time").textContent =
-    now.toLocaleTimeString();
+  document.getElementById("current-date").textContent = now.toLocaleDateString();
+  document.getElementById("current-time").textContent = now.toLocaleTimeString();
 }
 
-document.addEventListener("DOMContentLoaded", () => {
-  populateUser();
+document.addEventListener("DOMContentLoaded", async () => {
+  await populateUser();
   setupNavigation();
   updateDateTime();
   setInterval(updateDateTime, 1000);
-  fetchAttendanceHistory();
-  restoreAttendanceState();
 
-  document
-    .getElementById("btn-checkin")
-    .addEventListener("click", () => sendAction("clock-in"));
-  document
-    .getElementById("btn-checkout")
-    .addEventListener("click", () => sendAction("clock-out"));
-  document.getElementById("btn-break").addEventListener("click", () => {
+  await fetchAttendanceHistory();
+  await restoreAttendanceState();
+
+  document.getElementById("btn-checkin").addEventListener("click", async () => await sendAction("clock-in"));
+  document.getElementById("btn-checkout").addEventListener("click", async () => await sendAction("clock-out"));
+  document.getElementById("btn-break").addEventListener("click", async () => {
     const btnBreak = document.getElementById("btn-break");
-    sendAction(
-      btnBreak.dataset.state === "breaking" ? "break-end" : "break-start"
-    );
+    await sendAction(btnBreak.dataset.state === "breaking" ? "break-end" : "break-start");
   });
 });

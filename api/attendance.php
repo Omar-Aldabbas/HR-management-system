@@ -1,4 +1,5 @@
 <?php
+date_default_timezone_set('Asia/Amman');
 session_start([
     'cookie_httponly' => true,
     'cookie_secure' => false,
@@ -13,20 +14,14 @@ header("Content-Type: application/json");
 
 include '../config/config.php';
 
+$response = ['success' => false, 'message' => 'Invalid request'];
 
-//New way to check if auth Same as !isset($_SESSION['user_id'])
-// $user_id = $_SESSION['user_id'] ?? null;
-// if (!$user_id) {
-//     echo json_encode(['success' => false, 'message' => 'Unauthorized']);
-//     exit;
-// }
-
-if (!isset($_SESSION['user_id'])) {
+$user_id = $_SESSION['user_id'] ?? null;
+if (!$user_id) {
     echo json_encode(['success' => false, 'message' => 'UnAuthorized', 'redirect' => 'auth.html']);
     exit;
 }
 
-$response = ['success' => false, 'message' => 'Invalid request'];
 $input = json_decode(file_get_contents("php://input"), true);
 $action = $input['action'] ?? '';
 
@@ -50,9 +45,7 @@ if ($action === 'clock-in') {
     if ($res->num_rows === 0) {
         $stmt2 = $mysqli->prepare("INSERT INTO attendance (user_id, clock_in) VALUES (?, NOW())");
         $stmt2->bind_param("i", $user_id);
-        if ($stmt2->execute()) {
-            $response = ['success' => true, 'clock_in' => date("Y-m-d H:i:s")];
-        }
+        if ($stmt2->execute()) $response = ['success' => true, 'clock_in' => date("Y-m-d H:i:s")];
     } else {
         $response = ['success' => false, 'message' => 'Already clocked in'];
     }
@@ -63,18 +56,14 @@ if ($action === 'clock-in') {
     $res = $stmt->get_result();
     if ($res && $res->num_rows === 1) {
         $row = $res->fetch_assoc();
-        $clock_in = new DateTime($row['clock_in']);
-        $clock_out = new DateTime();
         $stmt2 = $mysqli->prepare("SELECT SUM(TIMESTAMPDIFF(SECOND, start_time, IFNULL(end_time, NOW()))) AS total_seconds FROM breaks WHERE attendance_id=?");
         $stmt2->bind_param("i", $row['id']);
         $stmt2->execute();
         $br = $stmt2->get_result()->fetch_assoc();
         $breakSeconds = $br['total_seconds'] ?? 0;
-        $totalHours = ($clock_out->getTimestamp() - $clock_in->getTimestamp() - $breakSeconds) / 3600;
-        $totalHours = round($totalHours, 2);
-        $stmt3 = $mysqli->prepare("UPDATE attendance SET clock_out=NOW(), total_hours=? WHERE id=?");
-        $stmt3->bind_param("di", $totalHours, $row['id']);
-        if ($stmt3->execute()) $response = ['success' => true, 'total_hours' => $totalHours];
+        $stmt3 = $mysqli->prepare("UPDATE attendance SET clock_out=NOW(), total_hours=(TIMESTAMPDIFF(SECOND, clock_in, NOW()) - ?) / 3600 WHERE id=?");
+        $stmt3->bind_param("ii", $breakSeconds, $row['id']);
+        if ($stmt3->execute()) $response = ['success' => true];
     } else {
         $response = ['success' => false, 'message' => 'No active session'];
     }
@@ -87,7 +76,10 @@ if ($action === 'clock-in') {
         $attendance_id = $res->fetch_assoc()['id'];
         $stmt2 = $mysqli->prepare("INSERT INTO breaks (attendance_id, start_time) VALUES (?, NOW())");
         $stmt2->bind_param("i", $attendance_id);
-        if ($stmt2->execute()) $response = ['success' => true];
+        $stmt2->execute();
+        $response = ['success' => true];
+    } else {
+        $response = ['success' => false, 'message' => 'No active session'];
     }
 } elseif ($action === 'break-end') {
     $stmt = $mysqli->prepare("SELECT b.id FROM breaks b JOIN attendance a ON b.attendance_id=a.id WHERE a.user_id=? AND b.end_time IS NULL ORDER BY b.start_time DESC LIMIT 1");
@@ -98,7 +90,10 @@ if ($action === 'clock-in') {
         $break_id = $res->fetch_assoc()['id'];
         $stmt2 = $mysqli->prepare("UPDATE breaks SET end_time=NOW() WHERE id=?");
         $stmt2->bind_param("i", $break_id);
-        if ($stmt2->execute()) $response = ['success' => true];
+        $stmt2->execute();
+        $response = ['success' => true];
+    } else {
+        $response = ['success' => false, 'message' => 'No active break'];
     }
 } elseif ($action === 'check-break') {
     $stmt = $mysqli->prepare("SELECT start_time FROM breaks b JOIN attendance a ON b.attendance_id=a.id WHERE a.user_id=? AND b.end_time IS NULL ORDER BY b.start_time DESC LIMIT 1");
@@ -169,3 +164,4 @@ if ($action === 'clock-in') {
 }
 
 echo json_encode($response);
+exit;
