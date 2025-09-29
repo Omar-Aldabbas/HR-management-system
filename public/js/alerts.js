@@ -1,3 +1,6 @@
+import { safeFetch } from "./helper/savefetch.js";
+
+
 const apiBase = 'http://localhost/HR-project/api';
 
 async function fetchAlerts() {

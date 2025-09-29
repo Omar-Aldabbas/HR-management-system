@@ -1,26 +1,16 @@
+import { safeFetch } from "./helper/savefetch.js";
+
+
 const apiBase = "http://localhost/HR-project/api";
 const attendanceApi = `${apiBase}/attendance.php`;
 const userApi = `${apiBase}/personal-data.php`;
+
 
 let clockInTime = null;
 let timerInterval = null;
 let totalBreakSeconds = 0;
 let isOnBreak = false;
 let breakStartTime = null;
-
-async function safeFetch(url, data = {}) {
-  try {
-    const res = await fetch(url, {
-      method: "POST",
-      credentials: "include",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data),
-    });
-    return await res.json();
-  } catch {
-    return { success: false, message: "Network error" };
-  }
-}
 
 async function populateUser() {
   const res = await safeFetch(userApi, { action: "get-user" });
@@ -31,7 +21,7 @@ async function populateUser() {
   const user = res.data;
   document.getElementById("user-name").textContent = user.full_name || user.name || "User";
   document.getElementById("user-position").textContent = user.position || "Employee";
-  document.getElementById("user-img").src = user.avatar ? `${apiBase}/${user.avatar}` : "https://via.placeholder.com/100";
+  document.getElementById("user-img").src = user.avatar ? `${apiBase}/${user.avatar}` : "";
 }
 
 function setupNavigation() {

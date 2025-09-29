@@ -6,6 +6,8 @@ session_start([
     'cookie_samesite' => 'Strict'
 ]);
 
+require_once "auth_check.php";
+
 header("Access-Control-Allow-Origin: http://localhost:8080");
 header("Access-Control-Allow-Credentials: true");
 header("Access-Control-Allow-Methods: POST, GET, OPTIONS");
@@ -16,11 +18,12 @@ include '../config/config.php';
 
 $response = ['success' => false, 'message' => 'Invalid request'];
 
-$user_id = $_SESSION['user_id'] ?? null;
-if (!$user_id) {
-    echo json_encode(['success' => false, 'message' => 'UnAuthorized', 'redirect' => 'auth.html']);
-    exit;
-}
+// $user_id = $_SESSION['user_id'] ?? null;
+// if (!$user_id) {
+//     echo json_encode(['success' => false, 'message' => 'UnAuthorized']);
+//     header("Location: auth.html");
+//     exit;
+// }
 
 $input = json_decode(file_get_contents("php://input"), true);
 $action = $input['action'] ?? '';

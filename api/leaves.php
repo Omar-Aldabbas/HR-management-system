@@ -5,6 +5,8 @@ session_start([
     'cookie_samesite' => 'Strict'
 ]);
 
+require_once "auth_check.php";
+
 header("Access-Control-Allow-Origin: http://localhost:8080");
 header("Access-Control-Allow-Credentials: true");
 header("Access-Control-Allow-Methods: POST, GET, OPTIONS");
