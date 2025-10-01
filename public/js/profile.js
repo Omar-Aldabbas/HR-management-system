@@ -1,3 +1,7 @@
+//  notes:
+// there is an image so i cant do the savefetch
+
+
 const apiBase = 'http://localhost/HR-project/api';
 
 async function populateUser() {

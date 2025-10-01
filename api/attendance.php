@@ -1,5 +1,5 @@
 <?php
-date_default_timezone_set('Asia/Amman');
+// date_default_timezone_set('Asia/Amman');
 session_start([
     'cookie_httponly' => true,
     'cookie_secure'   => false,

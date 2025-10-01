@@ -65,25 +65,42 @@ function getNavs() {
 }
 
 async function populateUser() {
-  const res = await safeFetch("personal-data.php", "get"); 
-  if (!res || !res.success) {
+  try {
+    const apiBase = 'http://localhost/HR-project/api';
+    const resRaw = await fetch(`${apiBase}/personal-data.php`, {
+      method: 'POST',
+      body: JSON.stringify({ action: 'get' }),
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' }
+    });
+    const res = await resRaw.json();
+
+    if (!res.success || !res.data) {
+      if (!window.location.pathname.endsWith('auth.html')) {
+        window.location.href = 'auth.html';
+      }
+      return;
+    }
+
+    const user = res.data;
+
+    const nameEl = document.getElementById('user-name');
+    const positionEl = document.getElementById('user-position');
+    const avatarEl = document.getElementById('user-img');
+
+    if (nameEl) nameEl.textContent = user.full_name || 'User';
+    if (positionEl) positionEl.textContent = user.position || 'Employee';
+    if (avatarEl) {
+      avatarEl.src = user.avatar && user.avatar.trim() !== ''
+        ? `${apiBase.replace('/api','')}/${user.avatar.replace(/^\/+/, '')}` 
+        : 'default-avatar.png';
+    }
+
+  } catch (err) {
+    console.error('Error fetching user:', err);
     if (!window.location.pathname.endsWith('auth.html')) {
       window.location.href = 'auth.html';
     }
-    return;
-  }
-
-  const user = res.data || {};
-  const nameEl = document.getElementById('user-name');
-  const positionEl = document.getElementById('user-position');
-  const avatarEl = document.getElementById('user-img');
-
-  if (nameEl) nameEl.textContent = user.full_name || 'User';
-  if (positionEl) positionEl.textContent = user.position || 'Employee';
-  if (avatarEl) {
-    avatarEl.src = user.avatar && user.avatar.trim() !== ''
-      ? `/${user.avatar.replace(/^\/+/, '')}` 
-      : 'default-avatar.png'; 
   }
 }
 

@@ -1,7 +1,7 @@
 <?php
 session_start([
     'cookie_httponly' => true,
-    'cookie_secure'   => false, // set to true if HTTPS
+    'cookie_secure'   => false, // set true if using HTTPS
     'cookie_samesite' => 'Strict'
 ]);
 
@@ -36,6 +36,7 @@ $user_role = $_SESSION['role'] ?? 'employee';
 
 try {
     switch ($action) {
+
         case 'get':
             $stmt = $mysqli->prepare("
                 SELECT id, name AS full_name, email, phone, department, position,
@@ -53,12 +54,15 @@ try {
             break;
 
         case 'update':
-            if (!in_array($user_role, ['employee', 'manager', 'hr', 'admin'])) {
+            if (!in_array($user_role, ['employee','manager','hr','admin'])) {
                 throw new Exception('You cannot update personal info');
             }
 
             $full_name   = trim($input['full_name'] ?? '');
             $email       = trim($input['email'] ?? '');
+            if (!$full_name || !$email) throw new Exception('Full name and email cannot be empty');
+            if (!filter_var($email, FILTER_VALIDATE_EMAIL)) throw new Exception('Invalid email');
+
             $phone       = trim($input['phone'] ?? '');
             $address     = trim($input['address'] ?? '');
             $city        = trim($input['city'] ?? '');
@@ -67,35 +71,30 @@ try {
             $postal_code = trim($input['postal_code'] ?? '');
             $department  = trim($input['department'] ?? '');
             $position    = trim($input['position'] ?? '');
-            $avatarPath  = trim($input['avatar'] ?? '');
 
-            if (!$full_name || !$email) throw new Exception('Full name and email cannot be empty');
-            if (!filter_var($email, FILTER_VALIDATE_EMAIL)) throw new Exception('Invalid email');
+            $avatarPath = null;
 
-            // If avatar is base64 string
-            if ($avatarPath && str_starts_with($avatarPath, 'data:image/')) {
-                $ext = '';
-                if (strpos($avatarPath, 'image/jpeg') !== false) $ext = 'jpg';
-                elseif (strpos($avatarPath, 'image/png') !== false) $ext = 'png';
-                elseif (strpos($avatarPath, 'image/gif') !== false) $ext = 'gif';
-                else throw new Exception('Invalid image format');
-
-                $avatarData = explode(',', $avatarPath)[1] ?? '';
+            if (!empty($input['avatar']) && str_starts_with($input['avatar'], 'data:image/')) {
+                $avatarData = explode(',', $input['avatar'])[1] ?? '';
                 $decoded = base64_decode($avatarData);
                 if (!$decoded) throw new Exception('Failed to decode avatar');
+
+                if (strpos($input['avatar'], 'image/jpeg') !== false) $ext = 'jpg';
+                elseif (strpos($input['avatar'], 'image/png') !== false) $ext = 'png';
+                elseif (strpos($input['avatar'], 'image/gif') !== false) $ext = 'gif';
+                else throw new Exception('Invalid image format');
 
                 $uploadDir = __DIR__ . '/../uploads/avatars/';
                 if (!is_dir($uploadDir)) mkdir($uploadDir, 0777, true);
 
                 $newFileName = $user_id . '_' . time() . '.' . $ext;
                 $fullPath = $uploadDir . $newFileName;
+
                 if (!file_put_contents($fullPath, $decoded)) {
                     throw new Exception('Failed to save avatar');
                 }
 
                 $avatarPath = 'uploads/avatars/' . $newFileName;
-            } else {
-                $avatarPath = null;
             }
 
             $sql = "UPDATE users SET name=?, email=?, phone=?, address=?, city=?, state=?, country=?, postal_code=?";
@@ -108,7 +107,7 @@ try {
                 $types .= "s";
             }
 
-            if (in_array($user_role, ['hr', 'manager'])) {
+            if (in_array($user_role, ['hr','manager'])) {
                 $sql .= ", department=?, position=?";
                 $params[] = $department;
                 $params[] = $position;
@@ -132,11 +131,7 @@ try {
                 $stmt2->execute();
                 $data = $stmt2->get_result()->fetch_assoc();
 
-                $response = [
-                    'success' => true,
-                    'message' => 'Personal info updated successfully',
-                    'data' => $data
-                ];
+                $response = ['success' => true, 'message' => 'Personal info updated successfully', 'data' => $data];
             } else {
                 $response['message'] = 'Failed to update personal info';
             }
@@ -146,6 +141,7 @@ try {
             $response['message'] = 'Invalid action';
             break;
     }
+
 } catch (Exception $e) {
     $response = ['success' => false, 'message' => $e->getMessage()];
 }

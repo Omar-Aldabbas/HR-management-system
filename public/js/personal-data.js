@@ -1,68 +1,73 @@
-import { safeFetch } from './helper/safeFetch.js';
+const apiBase = "http://localhost/HR-project/api";
+const apiFile = `${apiBase}/personal-data.php`;
 
-const apiFile = 'personal-data.php';
-const personalForm = document.getElementById('personal-form');
-const avatarInput = document.getElementById('avatar');
-const avatarPreview = document.getElementById('avatar-preview');
-const changeAvatarBtn = document.getElementById('change-avatar-btn');
-const editBtn = document.getElementById('edit-btn');
-const cancelBtn = document.getElementById('cancel-btn');
-const saveBtn = document.getElementById('save-btn');
-
-const inputs = Array.from(personalForm.querySelectorAll('input'));
+const personalForm = document.getElementById("personal-form");
+const avatarInput = document.getElementById("avatar");
+const avatarPreview = document.getElementById("avatar-preview");
+const changeAvatarBtn = document.getElementById("change-avatar-btn");
+const editBtn = document.getElementById("edit-btn");
+const cancelBtn = document.getElementById("cancel-btn");
+const saveBtn = document.getElementById("save-btn");
+const inputs = Array.from(personalForm.querySelectorAll("input"));
 
 const showEditable = (editable) => {
-  inputs.forEach(i => i.readOnly = !editable);
-  editBtn.classList.toggle('hidden', editable);
-  cancelBtn.classList.toggle('hidden', !editable);
-  saveBtn.classList.toggle('hidden', !editable);
-  changeAvatarBtn.classList.toggle('hidden', !editable);
+  inputs.forEach((i) => (i.readOnly = !editable));
+  editBtn.classList.toggle("hidden", editable);
+  cancelBtn.classList.toggle("hidden", !editable);
+  saveBtn.classList.toggle("hidden", !editable);
+  changeAvatarBtn.classList.toggle("hidden", !editable);
 };
 
 const loadUserData = async () => {
-  const res = await safeFetch(apiFile, 'get');
+  const resRaw = await fetch(apiFile, {
+    method: "POST",
+    body: JSON.stringify({ action: "get" }),
+    credentials: "include",
+    headers: { "Content-Type": "application/json" },
+  });
+  const res = await resRaw.json();
   if (!res.success || !res.data) {
-    window.location.href = 'auth.html';
+    window.location.href = "auth.html";
     return;
   }
+
   const user = res.data;
-  avatarPreview.src = user.avatar ? user.avatar.replace(/^\/+/, '') : '';
-  personalForm.full_name.value = user.full_name || '';
-  personalForm.email.value = user.email || '';
-  personalForm.phone.value = user.phone || '';
-  personalForm.address.value = user.address || '';
-  personalForm.city.value = user.city || '';
-  personalForm.state.value = user.state || '';
-  personalForm.country.value = user.country || '';
-  personalForm.postal_code.value = user.postal_code || '';
-  personalForm.department.value = user.department || '';
-  personalForm.position.value = user.position || '';
+  avatarPreview.src = user.avatar
+    ? `${apiBase.replace("/api", "")}/${user.avatar.replace(/^\/+/, "")}`
+    : "default-avatar.png";
+
+  personalForm.full_name.value = user.full_name || "";
+  personalForm.email.value = user.email || "";
+  personalForm.phone.value = user.phone || "";
+  personalForm.address.value = user.address || "";
+  personalForm.city.value = user.city || "";
+  personalForm.state.value = user.state || "";
+  personalForm.country.value = user.country || "";
+  personalForm.postal_code.value = user.postal_code || "";
+  personalForm.department.value = user.department || "";
+  personalForm.position.value = user.position || "";
 };
 
-avatarInput.addEventListener('change', () => {
+avatarInput.addEventListener("change", () => {
   const file = avatarInput.files[0];
-  if (file) {
-    avatarPreview.src = URL.createObjectURL(file);
-  }
+  if (file) avatarPreview.src = URL.createObjectURL(file);
 });
 
-editBtn.addEventListener('click', () => showEditable(true));
-
-cancelBtn.addEventListener('click', async () => {
+editBtn.addEventListener("click", () => showEditable(true));
+cancelBtn.addEventListener("click", async () => {
   showEditable(false);
   await loadUserData();
 });
 
-const fileToBase64 = (file) => {
-  return new Promise((resolve, reject) => {
+const fileToBase64 = (file) =>
+  new Promise((resolve, reject) => {
     const reader = new FileReader();
-    reader.onload = () => resolve(reader.result.split(',')[1]); 
+    reader.onload = () => resolve(reader.result);
     reader.onerror = reject;
     reader.readAsDataURL(file);
   });
-};
 
-personalForm.addEventListener('submit', async e => {
+personalForm.addEventListener("submit", async (e) => {
   e.preventDefault();
 
   const data = {
@@ -79,18 +84,25 @@ personalForm.addEventListener('submit', async e => {
   };
 
   if (avatarInput.files[0]) {
-    data.avatar = await fileToBase64(avatarInput.files[0]);
-    data.avatar_name = avatarInput.files[0].name; 
+    const base64 = await fileToBase64(avatarInput.files[0]);
+    data.avatar = base64;
+    data.avatar_name = avatarInput.files[0].name;
   }
 
-  const res = await safeFetch(apiFile, 'update', data);
+  const resRaw = await fetch(apiFile, {
+    method: "POST",
+    body: JSON.stringify({ action: "update", ...data }),
+    credentials: "include",
+    headers: { "Content-Type": "application/json" },
+  });
+  const res = await resRaw.json();
 
   if (res.success) {
     await loadUserData();
     showEditable(false);
   } else {
-    alert(res.message || 'Failed to update data');
+    alert(res.message || "Failed to update data");
   }
 });
 
-document.addEventListener('DOMContentLoaded', loadUserData);
+document.addEventListener("DOMContentLoaded", loadUserData);
