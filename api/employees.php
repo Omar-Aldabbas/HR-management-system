@@ -1,8 +1,8 @@
 <?php
 session_start([
     'cookie_httponly' => true,
-    'cookie_secure' => false,
-    'cookie_samesite' => 'Strict'
+    'cookie_secure' => false, 
+    'cookie_samesite' => 'None'
 ]);
 
 require_once "auth_check.php";

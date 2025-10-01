@@ -2,13 +2,16 @@ const apiBase = "http://localhost/HR-project/api";
 const attendanceApi = `${apiBase}/attendance.php`;
 const userApi = `${apiBase}/personal-data.php`;
 
-let serverTime = null;
-let clientOffset = 0;
+let user = {};
 let clockInTime = null;
 let timerInterval = null;
 let totalBreakSeconds = 0;
 let isOnBreak = false;
 let breakStartTime = null;
+
+function getAmmanDate() {
+    return new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Amman" }));
+}
 
 async function safeFetch(url, data = {}) {
     try {
@@ -24,45 +27,25 @@ async function safeFetch(url, data = {}) {
     }
 }
 
-async function getServerTime() {
-    const res = await safeFetch(attendanceApi, { action: "server-time" });
-    if (res.success && res.server_time) {
-        serverTime = new Date(res.server_time + " UTC");
-        clientOffset = new Date().getTime() - serverTime.getTime();
-    } else {
-        serverTime = new Date();
-        clientOffset = 0;
-    }
+
+async function getUser() {
+  const res = await safeFetch(userApi, {action: 'get'});
+
 }
 
-async function populateUser() {
-    const res = await safeFetch(userApi, { action: "get-user" });
-    if (!res.success) {
-        if (res.redirect) window.location.href = res.redirect;
-        return;
-    }
-    const user = res.data;
-    document.getElementById("user-name").textContent = user.full_name || user.name || "User";
-    document.getElementById("user-position").textContent = user.position || "Employee";
-    document.getElementById("user-img").src = user.avatar ? `${apiBase}/${user.avatar}` : "https://via.placeholder.com/100";
+function parseDateTime(dtString) {
+    return dtString ? new Date(dtString.replace(" ", "T")) : null;
 }
 
-function setupNavigation() {
-    document.querySelectorAll(".nav-btn, .mobile-nav-btn").forEach(btn => {
-        btn.addEventListener("click", () => {
-            const page = btn.dataset.page;
-            if (page) window.location.href = page + ".html";
-        });
-    });
-}
-
-function getCorrectedNow() {
-    return new Date(new Date().getTime() - clientOffset);
+function calculateTotalHours(clockIn, clockOut, breakSeconds = 0) {
+    if (!clockIn || !clockOut) return 0;
+    const diffMs = clockOut - clockIn - breakSeconds * 1000;
+    return Math.max((diffMs / 3600000).toFixed(2), 0);
 }
 
 function updateTimerUI() {
     if (!clockInTime) return;
-    const now = getCorrectedNow();
+    let now = getAmmanDate();
     let diff = (now - clockInTime) / 1000;
     if (isOnBreak && breakStartTime) diff -= (now - breakStartTime) / 1000;
     diff -= totalBreakSeconds;
@@ -85,37 +68,7 @@ function startLiveTimer() {
     timerInterval = setInterval(updateTimerUI, 1000);
 }
 
-// function getValueBetween (input, delimiter) {
-//   const regex = new RegExp(`${delimiter}(.*?)${delimiter}`, 'g');
-//   const matches= [];
-//   let match;
-
-//   while ((match = regex.exec(input)) !== null) {
-//     matches.push(match[1]);
-//   }
-//   return matches
-// }
-
-// function calculateTotalHours(clockIn, clockOut, breakSeconds = 0) {
-//     if (!clockOut) return 0;
-//     const inTime = getValueBetween(new Date(clockIn.replace(" ", "T") + " UTC"));
-//     const outTime = getValueBetween(new Date(clockOut.replace(" ", "T") + " UTC"));
-//     const totalHrs = (Number(outTime) - Number(inTime)) / 3600000 - breakSeconds / 3600;
-//     return totalHrs.toFixed(2);
-// }
-
-function calculateTotalHours(clockIn, clockOut, breakSeconds = 0) {
-    if (!clockIn || !clockOut) return 0;
-
-    const inTime = new Date(clockIn.replace(" ", "T"));
-    const outTime = new Date(clockOut.replace(" ", "T"));
-
-    const totalHrs = (outTime - inTime) / 3600000 - breakSeconds / 3600;
-
-    return totalHrs.toFixed(2);
-}
-
-function updateTodaySession() {
+function updateTodaySession(clockOut = null) {
     const statusEl = document.getElementById("session-status");
     const clockInEl = document.getElementById("session-clockin");
     const clockOutEl = document.getElementById("session-clockout");
@@ -128,25 +81,81 @@ function updateTodaySession() {
     }
 
     if (statusEl) statusEl.textContent = "Active session";
-    if (clockInEl) clockInEl.textContent = `In: ${clockInTime.toLocaleString()}`;
-    if (clockOutEl) clockOutEl.textContent = "";
+    if (clockInEl) clockInEl.textContent = `In: ${clockInTime.toLocaleString("en-US", { timeZone: "Asia/Amman" })}`;
+    if (clockOutEl) clockOutEl.textContent = clockOut ? `Out: ${clockOut.toLocaleString("en-US", { timeZone: "Asia/Amman" })}` : "";
+}
+
+async function fetchAttendanceHistory(limit = 5) {
+    const res = await safeFetch(attendanceApi, { action: "history" });
+    if (!res.success) return;
+
+    const list = document.getElementById("history-list");
+    if (!list) return;
+    list.innerHTML = "";
+
+    const records = res.history || [];
+    records.slice(0, limit).forEach(item => {
+        const clockIn = parseDateTime(item.clock_in);
+        const clockOut = parseDateTime(item.clock_out);
+        let breakSeconds = 0;
+        item.breaks.forEach(b => {
+            if (b.start_time) {
+                const start = parseDateTime(b.start_time);
+                const end = parseDateTime(b.end_time) || getAmmanDate();
+                breakSeconds += (end - start) / 1000;
+            }
+        });
+        const total = calculateTotalHours(clockIn, clockOut || getAmmanDate(), breakSeconds);
+
+        const li = document.createElement("li");
+        li.className = "bg-white p-3 rounded-lg shadow flex justify-between items-center";
+        li.innerHTML = `
+            <div>
+                <p class="font-semibold">${item.date}</p>
+                <p>In: ${item.clock_in}</p>
+                <p>Out: ${item.clock_out || "Still working"}</p>
+                <p>Breaks: ${Math.floor(breakSeconds / 60)} mins</p>
+            </div>
+            <div>Total: ${total} hrs</div>
+        `;
+        list.appendChild(li);
+    });
+
+    const totalHoursEl = document.getElementById("total-hours");
+    if (records.length && totalHoursEl) {
+        const last = records[0];
+        let breakSeconds = 0;
+        last.breaks.forEach(b => {
+            if (b.start_time) {
+                const start = parseDateTime(b.start_time);
+                const end = parseDateTime(b.end_time) || getAmmanDate();
+                breakSeconds += (end - start) / 1000;
+            }
+        });
+        totalHoursEl.textContent = calculateTotalHours(
+            parseDateTime(last.clock_in),
+            parseDateTime(last.clock_out) || getAmmanDate(),
+            breakSeconds
+        );
+    }
 }
 
 async function sendAction(action) {
-    const res = await safeFetch(attendanceApi, { action });
-
-    if (!res.success) {
-        if (res.redirect) window.location.href = res.redirect;
-        else return alert(res.message || "Action failed");
-    }
-
     const btnCheckIn = document.getElementById("btn-checkin");
     const btnCheckOut = document.getElementById("btn-checkout");
     const btnBreak = document.getElementById("btn-break");
-    const totalHoursEl = document.getElementById("total-hours");
 
-    if (action === "clock-in" && res.clock_in) {
-        clockInTime = new Date(res.clock_in + " UTC");
+    let payload = { action };
+    if (action === "clock-in") payload.clock_in = getAmmanDate().toISOString().slice(0,19).replace("T"," ");
+    if (action === "clock-out") payload.clock_out = getAmmanDate().toISOString().slice(0,19).replace("T"," ");
+    if (action === "break-start") payload.start_time = getAmmanDate().toISOString().slice(0,19).replace("T"," ");
+    if (action === "break-end") payload.end_time = getAmmanDate().toISOString().slice(0,19).replace("T"," ");
+
+    const res = await safeFetch(attendanceApi, payload);
+    if (!res.success) return alert(res.message || "Action failed");
+
+    if (action === "clock-in") {
+        clockInTime = parseDateTime(payload.clock_in);
         totalBreakSeconds = 0;
         isOnBreak = false;
         breakStartTime = null;
@@ -154,11 +163,12 @@ async function sendAction(action) {
         btnCheckIn?.classList.add("hidden");
         btnCheckOut?.classList.remove("hidden");
         btnBreak?.classList.remove("hidden");
+        updateTodaySession();
+        await fetchAttendanceHistory();
     }
 
-    if (action === "clock-out" && res.clock_out) {
+    if (action === "clock-out") {
         clearInterval(timerInterval);
-        const total = calculateTotalHours(clockInTime, res.clock_out, totalBreakSeconds);
         clockInTime = null;
         totalBreakSeconds = 0;
         isOnBreak = false;
@@ -166,21 +176,20 @@ async function sendAction(action) {
         btnCheckIn?.classList.remove("hidden");
         btnCheckOut?.classList.add("hidden");
         btnBreak?.classList.add("hidden");
-        if (totalHoursEl) totalHoursEl.textContent = total;
-        updateTodaySession();
+        updateTodaySession(parseDateTime(payload.clock_out));
         document.getElementById("live-timer").textContent = "00:00:00";
         await fetchAttendanceHistory();
     }
 
     if (action === "break-start") {
         isOnBreak = true;
-        breakStartTime = getCorrectedNow();
+        breakStartTime = getAmmanDate();
         btnBreak.textContent = "End Break";
         btnBreak.dataset.state = "breaking";
     }
 
     if (action === "break-end") {
-        if (breakStartTime) totalBreakSeconds += Math.floor((getCorrectedNow() - breakStartTime) / 1000);
+        if (breakStartTime) totalBreakSeconds += Math.floor((getAmmanDate() - breakStartTime) / 1000);
         isOnBreak = false;
         breakStartTime = null;
         btnBreak.textContent = "Break";
@@ -188,76 +197,51 @@ async function sendAction(action) {
     }
 }
 
-async function fetchAttendanceHistory(limit = 2) {
-    const res = await safeFetch(attendanceApi, { action: "history" });
-    if (!res.success) return;
-    const list = document.getElementById("history-list");
-    if (!list) return;
-    list.innerHTML = "";
-
-    const records = res.history || [];
-    records.slice(0, limit).forEach(item => {
-        const li = document.createElement("li");
-        li.className = "bg-white p-3 rounded-lg shadow flex justify-between items-center";
-        const total = calculateTotalHours(item.clock_in, item.clock_out, item.total_break_seconds || 0);
-        li.innerHTML = `
-            <div>
-                <p class="font-semibold">${item.date}</p>
-                <p>In: ${item.clock_in}</p>
-                <p>Out: ${item.clock_out || "Still working"}</p>
-                <p>Breaks: ${Math.floor(item.total_break_seconds / 60)} mins</p>
-            </div>
-            <div>Total: ${total} hrs</div>
-        `;
-        list.appendChild(li);
-    });
-}
-
 async function restoreAttendanceState() {
     const res = await safeFetch(attendanceApi, { action: "history" });
     if (!res.success || !res.history.length) return;
+
     const last = res.history[0];
     const btnCheckIn = document.getElementById("btn-checkin");
     const btnCheckOut = document.getElementById("btn-checkout");
     const btnBreak = document.getElementById("btn-break");
 
     if (!last.clock_out) {
-        clockInTime = new Date(last.clock_in + " UTC");
-        totalBreakSeconds = last.total_break_seconds || 0;
+        clockInTime = parseDateTime(last.clock_in);
+        totalBreakSeconds = 0;
+        last.breaks.forEach(b => {
+            if (b.start_time && !b.end_time) {
+                isOnBreak = true;
+                breakStartTime = parseDateTime(b.start_time);
+                btnBreak.textContent = "End Break";
+                btnBreak.dataset.state = "breaking";
+            } else if (b.start_time && b.end_time) {
+                totalBreakSeconds += (parseDateTime(b.end_time) - parseDateTime(b.start_time))/1000;
+            }
+        });
         startLiveTimer();
         btnCheckIn?.classList.add("hidden");
         btnCheckOut?.classList.remove("hidden");
         btnBreak?.classList.remove("hidden");
-
-        const breakRes = await safeFetch(attendanceApi, { action: "check-break" });
-        if (breakRes.success && breakRes.onBreak) {
-            isOnBreak = true;
-            breakStartTime = new Date(breakRes.start_time + " UTC");
-            btnBreak.textContent = "End Break";
-            btnBreak.dataset.state = "breaking";
-        }
+        updateTodaySession();
     }
 }
 
 function updateDateTime() {
-    const now = getCorrectedNow();
-    document.getElementById("current-date").textContent = now.toLocaleDateString();
-    document.getElementById("current-time").textContent = now.toLocaleTimeString();
+    const now = getAmmanDate();
+    document.getElementById("current-date").textContent = now.toLocaleDateString("en-US", { timeZone: "Asia/Amman" });
+    document.getElementById("current-time").textContent = now.toLocaleTimeString("en-US", { timeZone: "Asia/Amman" });
 }
 
 document.addEventListener("DOMContentLoaded", async () => {
-    await getServerTime();
-    await populateUser();
-    setupNavigation();
-    updateDateTime();
+    await getUser();
     setInterval(updateDateTime, 1000);
-
     await fetchAttendanceHistory();
     await restoreAttendanceState();
 
-    document.getElementById("btn-checkin").addEventListener("click", async () => await sendAction("clock-in"));
-    document.getElementById("btn-checkout").addEventListener("click", async () => await sendAction("clock-out"));
-    document.getElementById("btn-break").addEventListener("click", async () => {
+    document.getElementById("btn-checkin")?.addEventListener("click", async () => await sendAction("clock-in"));
+    document.getElementById("btn-checkout")?.addEventListener("click", async () => await sendAction("clock-out"));
+    document.getElementById("btn-break")?.addEventListener("click", async () => {
         const btnBreak = document.getElementById("btn-break");
         await sendAction(btnBreak.dataset.state === "breaking" ? "break-end" : "break-start");
     });

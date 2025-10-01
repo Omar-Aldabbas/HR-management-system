@@ -1,43 +1,59 @@
-import { safeFetch } from "./helper/savefetch.js";
+import { safeFetch } from "./helper/safeFetch.js";
 
-const apiBase = 'http://localhost/HR-project/api';
+const form = document.getElementById('change-password-form');
+const msgEl = document.getElementById('message');
+const backBtn = document.getElementById('back-btn');
 
-document.getElementById('change-password-form').addEventListener('submit', async (e) => {
+const showMessage = (text, success = false) => {
+  msgEl.textContent = text;
+  msgEl.classList.remove('text-red-500', 'text-green-500');
+  msgEl.classList.add(success ? 'text-green-500' : 'text-red-500');
+};
+
+form.addEventListener('submit', async (e) => {
   e.preventDefault();
-
-  const current = document.getElementById('current-password').value;
-  const newPass = document.getElementById('new-password').value;
-  const confirm = document.getElementById('confirm-password').value;
-  const msgEl = document.getElementById('message');
-
   msgEl.textContent = '';
 
-  const data = await safeFetch(`${apiBase}/auth.php`, {
-    action: 'change-password',
-    current_password: current,
-    new_password: newPass,
-    confirm_password: confirm
-  });
+  const current = document.getElementById('current-password').value.trim();
+  const newPass = document.getElementById('new-password').value.trim();
+  const confirm = document.getElementById('confirm-password').value.trim();
 
-  if (!data) {
-    msgEl.textContent = 'Error connecting to server.';
-    msgEl.classList.remove('text-green-500');
-    msgEl.classList.add('text-red-500');
+  if (!current || !newPass || !confirm) {
+    showMessage('Please fill in all fields.');
+    return;
+  }
+  if (newPass !== confirm) {
+    showMessage('New passwords do not match.');
     return;
   }
 
-  if (data.success) {
-    msgEl.classList.remove('text-red-500');
-    msgEl.classList.add('text-green-500');
-    msgEl.textContent = data.message;
-    setTimeout(() => window.location.href = 'index.html', 1500);
-  } else {
-    msgEl.classList.remove('text-green-500');
-    msgEl.classList.add('text-red-500');
-    msgEl.textContent = data.message;
+  try {
+    const res = await safeFetch('auth.php', 'change-password', {
+      current_password: current,
+      new_password: newPass,
+      confirm_password: confirm
+    });
+
+    console.log('Server response:', res);
+
+    if (!res) {
+      showMessage('Error connecting to server.');
+      return;
+    }
+
+    showMessage(res.message || 'Unexpected error', res.success);
+
+    if (res.success) {
+      form.reset();
+      setTimeout(() => window.location.href = 'home.html', 1500);
+    }
+
+  } catch (err) {
+    console.error('Unexpected error:', err);
+    showMessage('An unexpected error occurred.');
   }
 });
 
-document.getElementById('back-btn').addEventListener('click', () => {
-  window.location.href = 'index.html';
+backBtn.addEventListener('click', () => {
+  window.location.href = 'home.html';
 });

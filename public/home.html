@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HR Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <link rel="stylesheet" href="css/custom.css" />
+  <script type="module" src="./js/home.js" defer></script>
+  <script type="module" src="./js/navigation.js" defer></script>
+</head>
+<body class="bg-gray-100 text-gray-900 font-sans min-h-screen flex flex-col">
+
+  <header class="bg-blue-900 text-white shadow-md py-4">
+    <h1 class="text-2xl font-bold text-center tracking-tight">HR DASHBOARD</h1>
+  </header>
+
+  <main class="flex-1 container mx-auto p-6 space-y-6">
+
+    <section class="bg-gray-50 border border-gray-300 rounded-sm shadow-sm p-6 hover:shadow-md transition-all duration-200">
+      <h2 class="text-lg font-semibold mb-4 flex items-center space-x-2 text-gray-800">
+        <i class="fa-solid fa-chart-line text-blue-700"></i>
+        <span>Work Summary</span>
+      </h2>
+      <p id="work-summary" class="text-gray-700">Loading...</p>
+    </section>
+
+    <section class="bg-gray-50 border border-gray-300 rounded-sm shadow-sm p-6 hover:shadow-md transition-all duration-200">
+      <h2 class="text-lg font-semibold mb-4 flex items-center space-x-2 text-gray-800">
+        <i class="fa-solid fa-calendar-days text-green-700"></i>
+        <span>Today's Meetings</span>
+      </h2>
+      <div id="meetings-list" class="space-y-2 text-gray-700">Loading...</div>
+    </section>
+
+    <section class="bg-gray-50 border border-gray-300 rounded-sm shadow-sm p-6 hover:shadow-md transition-all duration-200">
+      <h2 class="text-lg font-semibold mb-4 flex items-center space-x-2 text-gray-800">
+        <i class="fa-solid fa-clipboard-check text-yellow-700"></i>
+        <span>Today's Tasks</span>
+      </h2>
+      <div id="tasks-list" class="space-y-2 text-gray-700">Loading...</div>
+    </section>
+
+  </main>
+
+</body>
+</html>

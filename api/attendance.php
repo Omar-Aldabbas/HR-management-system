@@ -6,127 +6,95 @@ session_start([
     'cookie_samesite' => 'Strict'
 ]);
 
-require_once "auth_check.php";
+// require_once "auth_check.php";
 require_once "../config/config.php";
 
 header("Access-Control-Allow-Origin: http://localhost:8080");
 header("Access-Control-Allow-Credentials: true");
-header("Access-Control-Allow-Methods: POST, GET, OPTIONS");
+header("Access-Control-Allow-Methods: POST, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type");
 header("Content-Type: application/json");
 
-$response = ['success' => false, 'message' => 'Invalid request'];
-
 $user_id = $_SESSION['user_id'] ?? null;
 if (!$user_id) {
-    echo json_encode(['success' => false, 'message' => 'Unauthorized']);
+    echo json_encode(['success' => false, 'error' => 'unauthorized']);
     exit;
 }
 
-$input  = json_decode(file_get_contents("php://input"), true);
+$input  = json_decode(file_get_contents("php://input"), true) ?? [];
 $action = $input['action'] ?? '';
-
-function getUserStatus($mysqli, $uid) {
-    $stmt = $mysqli->prepare("
-        SELECT clock_in, clock_out 
-        FROM attendance 
-        WHERE user_id=? 
-        ORDER BY clock_in DESC 
-        LIMIT 1
-    ");
-    if (!$stmt) return "Unknown";
-    $stmt->bind_param("i", $uid);
-    $stmt->execute();
-    $res = $stmt->get_result();
-    if ($res && $row = $res->fetch_assoc()) {
-        return empty($row['clock_out']) ? 'Working' : 'Left';
-    }
-    return 'Not started';
-}
+$response = ['success' => false, 'message' => 'Unknown action'];
 
 switch ($action) {
-    case 'server-time':
-        $response = ['success' => true, 'server_time' => date("Y-m-d H:i:s")];
-        break;
 
     case 'clock-in':
+        $clockIn = $input['clock_in'] ?? null;
+        if (!$clockIn) { $response['message'] = 'Missing clock_in'; break; }
+
         $stmt = $mysqli->prepare("SELECT id FROM attendance WHERE user_id=? AND clock_out IS NULL");
         $stmt->bind_param("i", $user_id);
         $stmt->execute();
         $res = $stmt->get_result();
+
         if ($res->num_rows === 0) {
-            $stmt2 = $mysqli->prepare("INSERT INTO attendance (user_id, clock_in) VALUES (?, NOW())");
-            $stmt2->bind_param("i", $user_id);
-            if ($stmt2->execute()) {
-                $response = ['success' => true, 'clock_in' => date("Y-m-d H:i:s")];
-            }
+            $stmt2 = $mysqli->prepare("INSERT INTO attendance (user_id, clock_in) VALUES (?, ?)");
+            $stmt2->bind_param("is", $user_id, $clockIn);
+            $response = $stmt2->execute()
+                ? ['success' => true, 'clock_in' => $clockIn]
+                : ['success' => false, 'message' => 'Failed to clock in'];
         } else {
-            $response = ['success' => false, 'message' => 'Already clocked in'];
+            $response['message'] = 'Already clocked in';
         }
         break;
 
     case 'clock-out':
-        $stmt = $mysqli->prepare("
-            SELECT id, clock_in 
-            FROM attendance 
-            WHERE user_id=? AND clock_out IS NULL 
-            ORDER BY clock_in DESC 
-            LIMIT 1
-        ");
+        $clockOut = $input['clock_out'] ?? null;
+        if (!$clockOut) { $response['message'] = 'Missing clock_out'; break; }
+
+        $stmt = $mysqli->prepare("SELECT id FROM attendance WHERE user_id=? AND clock_out IS NULL ORDER BY clock_in DESC LIMIT 1");
         $stmt->bind_param("i", $user_id);
         $stmt->execute();
         $res = $stmt->get_result();
+
         if ($row = $res->fetch_assoc()) {
-            $attendance_id = $row['id'];
-            $stmt2 = $mysqli->prepare("
-                SELECT SUM(TIMESTAMPDIFF(SECOND, start_time, IFNULL(end_time, NOW()))) AS total_seconds
-                FROM breaks 
-                WHERE attendance_id=?
-            ");
-            $stmt2->bind_param("i", $attendance_id);
-            $stmt2->execute();
-            $br = $stmt2->get_result()->fetch_assoc();
-            $breakSeconds = $br['total_seconds'] ?? 0;
-            $stmt3 = $mysqli->prepare("
-                UPDATE attendance 
-                SET clock_out=NOW(), 
-                    total_hours=(TIMESTAMPDIFF(SECOND, clock_in, NOW()) - ?) / 3600 
-                WHERE id=?
-            ");
-            $stmt3->bind_param("ii", $breakSeconds, $attendance_id);
-            if ($stmt3->execute()) {
-                $response = ['success' => true, 'clock_out' => date("Y-m-d H:i:s")];
-            }
+            $stmt2 = $mysqli->prepare("UPDATE attendance SET clock_out=? WHERE id=?");
+            $stmt2->bind_param("si", $clockOut, $row['id']);
+            $response = $stmt2->execute()
+                ? ['success' => true, 'clock_out' => $clockOut]
+                : ['success' => false, 'message' => 'Failed to clock out'];
         } else {
-            $response = ['success' => false, 'message' => 'No active session'];
+            $response['message'] = 'No active session';
         }
         break;
 
     case 'break-start':
-        $stmt = $mysqli->prepare("
-            SELECT id FROM attendance 
-            WHERE user_id=? AND clock_out IS NULL 
-            ORDER BY clock_in DESC LIMIT 1
-        ");
+        $startTime = $input['start_time'] ?? null;
+        if (!$startTime) { $response['message'] = 'Missing start_time'; break; }
+
+        $stmt = $mysqli->prepare("SELECT id FROM attendance WHERE user_id=? AND clock_out IS NULL ORDER BY clock_in DESC LIMIT 1");
         $stmt->bind_param("i", $user_id);
         $stmt->execute();
         $res = $stmt->get_result();
+
         if ($row = $res->fetch_assoc()) {
-            $attendance_id = $row['id'];
-            $stmt2 = $mysqli->prepare("INSERT INTO breaks (attendance_id, start_time) VALUES (?, NOW())");
-            $stmt2->bind_param("i", $attendance_id);
-            $stmt2->execute();
-            $response = ['success' => true, 'message' => 'Break started'];
+            $stmt2 = $mysqli->prepare("INSERT INTO breaks (attendance_id, start_time) VALUES (?, ?)");
+            $stmt2->bind_param("is", $row['id'], $startTime);
+            $response = $stmt2->execute()
+                ? ['success' => true, 'message' => 'Break started']
+                : ['success' => false, 'message' => 'Failed to start break'];
         } else {
-            $response = ['success' => false, 'message' => 'No active session'];
+            $response['message'] = 'No active session';
         }
         break;
 
     case 'break-end':
+        $endTime = $input['end_time'] ?? null;
+        if (!$endTime) { $response['message'] = 'Missing end_time'; break; }
+
         $stmt = $mysqli->prepare("
             SELECT b.id 
             FROM breaks b 
-            JOIN attendance a ON b.attendance_id=a.id 
+            JOIN attendance a ON b.attendance_id = a.id 
             WHERE a.user_id=? AND b.end_time IS NULL 
             ORDER BY b.start_time DESC 
             LIMIT 1
@@ -134,115 +102,44 @@ switch ($action) {
         $stmt->bind_param("i", $user_id);
         $stmt->execute();
         $res = $stmt->get_result();
-        if ($row = $res->fetch_assoc()) {
-            $break_id = $row['id'];
-            $stmt2 = $mysqli->prepare("UPDATE breaks SET end_time=NOW() WHERE id=?");
-            $stmt2->bind_param("i", $break_id);
-            $stmt2->execute();
-            $response = ['success' => true, 'message' => 'Break ended'];
-        } else {
-            $response = ['success' => false, 'message' => 'No active break'];
-        }
-        break;
 
-    case 'check-break':
-        $stmt = $mysqli->prepare("
-            SELECT start_time 
-            FROM breaks b 
-            JOIN attendance a ON b.attendance_id=a.id 
-            WHERE a.user_id=? AND b.end_time IS NULL 
-            ORDER BY b.start_time DESC 
-            LIMIT 1
-        ");
-        $stmt->bind_param("i", $user_id);
-        $stmt->execute();
-        $res = $stmt->get_result();
         if ($row = $res->fetch_assoc()) {
-            $response = ['success' => true, 'onBreak' => true, 'start_time' => $row['start_time']];
+            $stmt2 = $mysqli->prepare("UPDATE breaks SET end_time=? WHERE id=?");
+            $stmt2->bind_param("si", $endTime, $row['id']);
+            $response = $stmt2->execute()
+                ? ['success' => true, 'message' => 'Break ended']
+                : ['success' => false, 'message' => 'Failed to end break'];
         } else {
-            $response = ['success' => true, 'onBreak' => false];
+            $response['message'] = 'No active break';
         }
         break;
 
     case 'history':
-        $stmt = $mysqli->prepare("
-            SELECT a.id, a.clock_in, a.clock_out, a.total_hours
-            FROM attendance a
-            WHERE a.user_id = ?
-            ORDER BY a.clock_in DESC
-            LIMIT 20
-        ");
+        $stmt = $mysqli->prepare("SELECT id, clock_in, clock_out FROM attendance WHERE user_id=? ORDER BY clock_in DESC LIMIT 20");
         $stmt->bind_param("i", $user_id);
         $stmt->execute();
         $res = $stmt->get_result();
-
         $history = [];
+
         while ($row = $res->fetch_assoc()) {
-            $attendance_id = $row['id'];
-            $stmt2 = $mysqli->prepare("
-                SELECT start_time, end_time, 
-                       TIMESTAMPDIFF(SECOND, start_time, IFNULL(end_time, NOW())) AS duration 
-                FROM breaks 
-                WHERE attendance_id=?
-            ");
-            $stmt2->bind_param("i", $attendance_id);
+            $stmt2 = $mysqli->prepare("SELECT start_time, end_time FROM breaks WHERE attendance_id=?");
+            $stmt2->bind_param("i", $row['id']);
             $stmt2->execute();
             $brRes = $stmt2->get_result();
-
-            $breaks = [];
-            $totalBreakSeconds = 0;
-            while ($br = $brRes->fetch_assoc()) {
-                $br['duration'] = (int)$br['duration'];
-                $breaks[] = $br;
-                $totalBreakSeconds += $br['duration'];
-            }
+            $breaks = $brRes->fetch_all(MYSQLI_ASSOC);
 
             $history[] = [
-                'date'=> date("Y-m-d", strtotime($row['clock_in'])),
-                'clock_in'=> $row['clock_in'],
-                'clock_out'=> $row['clock_out'],
-                'total_hours'=> $row['total_hours'],
-                'breaks'=> $breaks,
-                'total_break_seconds'=> $totalBreakSeconds
+                'date' => date("Y-m-d", strtotime($row['clock_in'])),
+                'clock_in' => $row['clock_in'],
+                'clock_out' => $row['clock_out'],
+                'breaks' => $breaks
             ];
         }
         $response = ['success' => true, 'history' => $history];
         break;
 
-    case 'department':
-    case 'all':
-        $stmt = $mysqli->prepare("SELECT role, department_id FROM users WHERE id=?");
-        $stmt->bind_param("i", $user_id);
-        $stmt->execute();
-        $me = $stmt->get_result()->fetch_assoc();
-
-        $employees = [];
-        if ($action === 'department' && $me['role'] === 'manager') {
-            $stmt2 = $mysqli->prepare("SELECT id, name FROM users WHERE department_id=? AND role='employee'");
-            $stmt2->bind_param("i", $me['department_id']);
-            $stmt2->execute();
-            $res2 = $stmt2->get_result();
-            while ($row = $res2->fetch_assoc()) {
-                $employees[] = [
-                    'name'   => $row['name'],
-                    'status' => getUserStatus($mysqli, $row['id'])
-                ];
-            }
-        }
-        if ($action === 'all' && $me['role'] === 'hr') {
-            $res2 = $mysqli->query("SELECT id, name FROM users WHERE role IN ('manager','employee')");
-            while ($row = $res2->fetch_assoc()) {
-                $employees[] = [
-                    'name'   => $row['name'],
-                    'status' => getUserStatus($mysqli, $row['id'])
-                ];
-            }
-        }
-        $response = ['success' => true, 'employees' => $employees];
-        break;
-
     default:
-        $response = ['success' => false, 'message' => 'Unknown action'];
+        $response['message'] = 'Unknown action';
 }
 
 echo json_encode($response);

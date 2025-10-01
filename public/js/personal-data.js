@@ -1,146 +1,96 @@
-const apiBase = 'http://localhost/HR-project/api';
+import { safeFetch } from './helper/safeFetch.js';
 
-async function populateUser() {
-  try {
-    const formData = new FormData();
-    formData.append('action', 'get');
+const apiFile = 'personal-data.php';
+const personalForm = document.getElementById('personal-form');
+const avatarInput = document.getElementById('avatar');
+const avatarPreview = document.getElementById('avatar-preview');
+const changeAvatarBtn = document.getElementById('change-avatar-btn');
+const editBtn = document.getElementById('edit-btn');
+const cancelBtn = document.getElementById('cancel-btn');
+const saveBtn = document.getElementById('save-btn');
 
-    const resRaw = await fetch(`${apiBase}/personal-data.php`, {
-      method: 'POST',
-      body: formData,
-      credentials: 'include'
-    });
+const inputs = Array.from(personalForm.querySelectorAll('input'));
 
-    const res = await resRaw.json();
+const showEditable = (editable) => {
+  inputs.forEach(i => i.readOnly = !editable);
+  editBtn.classList.toggle('hidden', editable);
+  cancelBtn.classList.toggle('hidden', !editable);
+  saveBtn.classList.toggle('hidden', !editable);
+  changeAvatarBtn.classList.toggle('hidden', !editable);
+};
 
-    if (!res.success) {
-      window.location.href = 'auth.html';
-      return;
-    }
-
-    const user = res.data;
-    if (!user) {
-      console.error('User data undefined', res);
-      window.location.href = 'auth.html';
-      return;
-    }
-
-    document.getElementById('full_name').value = user.full_name || '';
-    document.getElementById('email').value = user.email || '';
-    document.getElementById('phone').value = user.phone || '';
-    document.getElementById('address').value = user.address || '';
-    document.getElementById('city').value = user.city || '';
-    document.getElementById('state').value = user.state || '';
-    document.getElementById('country').value = user.country || '';
-    document.getElementById('postal_code').value = user.postal_code || '';
-    document.getElementById('department').value = user.department || '';
-    document.getElementById('position').value = user.position || '';
-    document.getElementById('avatar-preview').src = user.avatar
-      ? `http://localhost/HR-project/${user.avatar.replace(/^\/+/, '')}`
-      : '';
-
-    document.getElementById('department').readOnly = true;
-    document.getElementById('position').readOnly = true;
-
-  } catch (err) {
-    console.error('Error fetching user:', err);
+const loadUserData = async () => {
+  const res = await safeFetch(apiFile, 'get');
+  if (!res.success || !res.data) {
     window.location.href = 'auth.html';
+    return;
   }
-}
+  const user = res.data;
+  avatarPreview.src = user.avatar ? user.avatar.replace(/^\/+/, '') : '';
+  personalForm.full_name.value = user.full_name || '';
+  personalForm.email.value = user.email || '';
+  personalForm.phone.value = user.phone || '';
+  personalForm.address.value = user.address || '';
+  personalForm.city.value = user.city || '';
+  personalForm.state.value = user.state || '';
+  personalForm.country.value = user.country || '';
+  personalForm.postal_code.value = user.postal_code || '';
+  personalForm.department.value = user.department || '';
+  personalForm.position.value = user.position || '';
+};
 
-function enableEditing(enable = true) {
-  const fields = document.querySelectorAll('#personal-form input');
-  fields.forEach(f => {
-    if (!['department','position'].includes(f.id)) f.readOnly = !enable;
-  });
-
-  document.getElementById('edit-btn').classList.toggle('hidden', enable);
-  document.getElementById('cancel-btn').classList.toggle('hidden', !enable);
-  document.getElementById('save-btn').classList.toggle('hidden', !enable);
-  document.getElementById('change-avatar-btn').classList.toggle('hidden', !enable);
-}
-
-function setupFormActions() {
-  const editBtn = document.getElementById('edit-btn');
-  const cancelBtn = document.getElementById('cancel-btn');
-  const avatarInput = document.getElementById('avatar');
-  const avatarPreview = document.getElementById('avatar-preview');
-
-  editBtn.addEventListener('click', () => enableEditing(true));
-  cancelBtn.addEventListener('click', () => {
-    enableEditing(false);
-    populateUser();
-  });
-
-  avatarInput.addEventListener('change', (e) => {
-    if (e.target.files && e.target.files[0]) {
-      const reader = new FileReader();
-      reader.onload = (ev) => avatarPreview.src = ev.target.result;
-      reader.readAsDataURL(e.target.files[0]);
-    }
-  });
-
-  document.getElementById('personal-form').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const formData = new FormData();
-    formData.append('action', 'update');
-    ['full_name','email','phone','address','city','state','country','postal_code'].forEach(id => {
-      formData.append(id, document.getElementById(id).value);
-    });
-    if (avatarInput.files[0]) formData.append('avatar', avatarInput.files[0]);
-
-    try {
-      const resRaw = await fetch(`${apiBase}/personal-data.php`, {
-        method: 'POST',
-        body: formData,
-        credentials: 'include'
-      });
-      const res = await resRaw.json();
-
-      if (res.success) {
-        enableEditing(false);
-        populateUser();
-        alert('Personal info updated successfully');
-      } else {
-        alert(res.message || 'Update failed');
-      }
-    } catch (err) {
-      console.error('Update error:', err);
-    }
-  });
-}
-
-// function setupLogout() {
-//   const btn = document.getElementById('logout-btn');
-//   if (!btn) return;
-
-//   btn.addEventListener('click', async () => {
-//     const formData = new FormData();
-//     formData.append('action', 'logout');
-//     const resRaw = await fetch(`${apiBase}/auth.php`, {
-//       method: 'POST',
-//       body: formData,
-//       credentials: 'include'
-//     });
-//     const res = await resRaw.json();
-//     if (res.success) window.location.href = 'auth.html';
-//   });
-// }
-
-// function setupLogout() {
-//   const btn = document.getElementById('logout-btn');
-//   if (!btn) return;
-
-//   btn.addEventListener('click', async () => {
-//     const res = await safeFetch(`${apiBase}/auth.php`, { action: 'logout' });
-//     if (res.success) window.location.href = 'auth.html';
-//   });
-// }
-
-
-
-document.addEventListener('DOMContentLoaded', () => {
-  populateUser();
-  setupFormActions();
-  // setupLogout();
+avatarInput.addEventListener('change', () => {
+  const file = avatarInput.files[0];
+  if (file) {
+    avatarPreview.src = URL.createObjectURL(file);
+  }
 });
+
+editBtn.addEventListener('click', () => showEditable(true));
+
+cancelBtn.addEventListener('click', async () => {
+  showEditable(false);
+  await loadUserData();
+});
+
+const fileToBase64 = (file) => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result.split(',')[1]); 
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+};
+
+personalForm.addEventListener('submit', async e => {
+  e.preventDefault();
+
+  const data = {
+    full_name: personalForm.full_name.value,
+    email: personalForm.email.value,
+    phone: personalForm.phone.value,
+    address: personalForm.address.value,
+    city: personalForm.city.value,
+    state: personalForm.state.value,
+    country: personalForm.country.value,
+    postal_code: personalForm.postal_code.value,
+    department: personalForm.department.value,
+    position: personalForm.position.value,
+  };
+
+  if (avatarInput.files[0]) {
+    data.avatar = await fileToBase64(avatarInput.files[0]);
+    data.avatar_name = avatarInput.files[0].name; 
+  }
+
+  const res = await safeFetch(apiFile, 'update', data);
+
+  if (res.success) {
+    await loadUserData();
+    showEditable(false);
+  } else {
+    alert(res.message || 'Failed to update data');
+  }
+});
+
+document.addEventListener('DOMContentLoaded', loadUserData);

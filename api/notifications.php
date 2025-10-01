@@ -1,11 +1,11 @@
 <?php
 session_start([
     'cookie_httponly' => true,
-    'cookie_secure' => false,
-    'cookie_samesite' => 'Strict'
+    'cookie_secure' => false, 
+    'cookie_samesite' => 'None'
 ]);
 
-require_once "auth_check.php";
+// require_once "auth_check.php";
 
 header("Access-Control-Allow-Origin: http://localhost:8080");
 header("Access-Control-Allow-Credentials: true");
@@ -21,7 +21,7 @@ $input = json_decode(file_get_contents('php://input'), true);
 $action = $input['action'] ?? '';
 
 if (!isset($_SESSION['user_id'])) {
-    echo json_encode(['success' => false, 'message' => 'Unauthorized', 'redirect' => 'auth.html']);
+    echo json_encode(['success' => false, 'error' => 'unauthorized', 'redirect' => 'auth.html']);
     exit;
 }
 $user_id   = (int) $_SESSION['user_id'];
