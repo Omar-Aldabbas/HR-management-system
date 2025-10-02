@@ -1,64 +1,112 @@
-import { safeFetch } from "./helper/savefetch.js";
+import { safeFetch } from './helper/safeFetch.js';
 
+let currentUser = null;
+let users = [];
+let alerts = [];
+let selectedUsers = [];
 
-const apiBase = 'http://localhost/HR-project/api';
+const messageInput = document.getElementById("alert-message");
+const usersSelect = document.getElementById("users-select");
+const sendBtn = document.getElementById("send-alert-btn");
+const alertsContainer = document.getElementById("alerts-container");
 
-async function fetchAlerts() {
-  try {
-    const res = await fetch(`${apiBase}/alerts.php`, {
-      method: 'GET',
-      credentials: 'include'
-    });
-    const data = await res.json();
-    if (!data.success) {
-      if (data.message === 'Not authenticated') window.location.href = 'auth.html';
-      return;
+async function loadCurrentUser() {
+  console.log("Loading user data...");
+  const res = await safeFetch("personal-data.php", "get");
+  console.log("User data response:", res);
+
+  if (res.success) {
+    currentUser = res.data;
+
+    if (currentUser.role === "manager" || currentUser.role === "hr") {
+      sendBtn.style.display = "block";
+      await loadUsers();
+    } else {
+      sendBtn.style.display = "none";
     }
-    renderAlerts(data.alerts || []);
-  } catch (err) {
-    console.error('Error fetching alerts:', err);
-    document.getElementById('alerts-container').innerHTML =
-      `<p class="text-red-500">Failed to load alerts.</p>`;
+
+    await loadAlerts();
+  } else {
+    alert("Failed to load user data");
+    console.error(res);
   }
 }
 
-function renderAlerts(alerts) {
-  const container = document.getElementById('alerts-container');
-  container.innerHTML = '';
+async function loadUsers() {
+  console.log("Loading users...");
+  const res = await safeFetch("alerts.php", "list_users", { currentUser });
+  console.log("Users response:", res);
 
-  if (alerts.length === 0) {
-    container.innerHTML = `<p class="text-gray-500">No alerts available.</p>`;
+  if (res.success) {
+    users = res.users;
+    renderUserSelect();
+  } else {
+    alert("Failed to load users");
+    console.error(res);
+  }
+}
+
+function renderUserSelect() {
+  console.log("Rendering user list...");
+  usersSelect.innerHTML = "";
+  users.forEach(user => {
+    const option = document.createElement("option");
+    option.value = user.id;
+    option.textContent = `${user.name} (${user.role})`;
+    usersSelect.appendChild(option);
+  });
+}
+
+async function loadAlerts() {
+  console.log("Loading alerts...");
+  const res = await safeFetch("alerts.php", "list", { currentUser });
+  console.log("Alerts response:", res);
+
+  if (res.success) {
+    alerts = res.alerts;
+    renderAlerts();
+  } else {
+    alert("Failed to load alerts");
+    console.error(res);
+  }
+}
+
+function renderAlerts() {
+  alertsContainer.innerHTML = "";
+  if (!alerts.length) {
+    alertsContainer.textContent = "No alerts found";
     return;
   }
 
-  alerts.forEach(alert => {
-    const div = document.createElement('div');
-    let bgClass = 'bg-blue-50 border-blue-400';
-    if (alert.type === 'warning') bgClass = 'bg-yellow-50 border-yellow-400';
-    if (alert.type === 'critical') bgClass = 'bg-red-50 border-red-400';
-
-    div.className = `p-3 border-l-4 rounded shadow ${bgClass} flex justify-between items-center`;
-    div.innerHTML = `
-      <span>${alert.message}</span>
-      <span class="text-gray-400 text-sm">${new Date(alert.created_at).toLocaleString()}</span>
-    `;
-    container.appendChild(div);
+  alerts.forEach(a => {
+    const div = document.createElement("div");
+    div.classList.add("alert-item");
+    div.textContent = `[${a.alert_date}] ${a.sender_name} -> ${a.message}`;
+    alertsContainer.appendChild(div);
   });
 }
 
-function setupBackToTop() {
-  const btn = document.getElementById('back-to-top');
-  window.addEventListener('scroll', () => {
-    if (window.scrollY > 300) btn.classList.remove('hidden');
-    else btn.classList.add('hidden');
-  });
+sendBtn.addEventListener("click", async () => {
+  const message = messageInput.value.trim();
+  if (!message) return alert("Message cannot be empty");
 
-  btn.addEventListener('click', () => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  });
-}
+  selectedUsers = Array.from(usersSelect.selectedOptions).map(opt => opt.value);
+  const department = currentUser.role === "manager" ? currentUser.department : "";
 
-document.addEventListener('DOMContentLoaded', () => {
-  fetchAlerts();
-  setupBackToTop();
+  const payload = { message, users: selectedUsers, department, currentUser };
+
+  console.log("Sending alert:", payload);
+  const res = await safeFetch("alerts.php", "send", payload);
+  console.log("Send alert response:", res);
+
+  if (res.success) {
+    alert("Alert sent successfully");
+    messageInput.value = "";
+    await loadAlerts();
+  } else {
+    alert(res.message || "Failed to send alert");
+    console.error(res);
+  }
 });
+
+document.addEventListener("DOMContentLoaded", loadCurrentUser);
