@@ -18,32 +18,17 @@ const showForm = (form) => {
   messageEl.classList.add('hidden');
 };
 
-document.getElementById('show-signup').addEventListener('click', e => {
-  e.preventDefault();
-  showForm(signupForm);
-});
-
-document.getElementById('show-forgot').addEventListener('click', e => {
-  e.preventDefault();
-  showForm(forgotForm);
-});
-
-document.getElementById('back-to-login1').addEventListener('click', e => {
-  e.preventDefault();
-  showForm(loginForm);
-});
-
-document.getElementById('back-to-login2').addEventListener('click', e => {
-  e.preventDefault();
-  showForm(loginForm);
-});
+document.getElementById('show-signup').addEventListener('click', e => { e.preventDefault(); showForm(signupForm); });
+document.getElementById('show-forgot').addEventListener('click', e => { e.preventDefault(); showForm(forgotForm); });
+document.getElementById('back-to-login1').addEventListener('click', e => { e.preventDefault(); showForm(loginForm); });
+document.getElementById('back-to-login2').addEventListener('click', e => { e.preventDefault(); showForm(loginForm); });
 
 const checkSession = async () => {
   const res = await safeFetch(apiFile, 'check-session');
-  if (!res) return;
-  if (res.loggedIn && res.redirect) window.location.href = res.redirect;
+  if (res.success && res.loggedIn && res.redirect) {
+    window.location.href = res.redirect;
+  }
 };
-
 checkSession();
 
 loginForm.addEventListener('submit', async e => {
@@ -52,7 +37,6 @@ loginForm.addEventListener('submit', async e => {
     email: loginForm.email.value.trim(),
     password: loginForm.password.value
   });
-  if (!res) return showMessage("Failed to connect to server", false);
   showMessage(res.message, res.success);
   if (res.success) window.location.href = res.redirect || 'home.html';
 });
@@ -65,7 +49,6 @@ signupForm.addEventListener('submit', async e => {
     password: signupForm.password.value,
     confirm_password: signupForm.confirm_password.value
   });
-  if (!res) return showMessage("Failed to connect to server", false);
   showMessage(res.message, res.success);
   if (res.success) window.location.href = res.redirect || 'auth.html';
 });
@@ -75,7 +58,6 @@ forgotForm.addEventListener('submit', async e => {
   const res = await safeFetch(apiFile, 'forgot', {
     email: forgotForm.email.value.trim()
   });
-  if (!res) return showMessage("Failed to connect to server", false);
   showMessage(res.message, res.success);
   if (res.success) window.location.href = res.redirect || 'auth.html';
 });

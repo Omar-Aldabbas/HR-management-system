@@ -1,8 +1,8 @@
 <?php
 session_start([
     'cookie_httponly' => true,
-    'cookie_secure'   => false, // set true if using HTTPS
-    'cookie_samesite' => 'Strict'
+    'cookie_secure'   => false,
+    'cookie_samesite' => 'Lax'
 ]);
 
 header('Content-Type: application/json');
@@ -36,7 +36,6 @@ $user_role = $_SESSION['role'] ?? 'employee';
 
 try {
     switch ($action) {
-
         case 'get':
             $stmt = $mysqli->prepare("
                 SELECT id, name AS full_name, email, phone, department, position,
@@ -71,29 +70,23 @@ try {
             $postal_code = trim($input['postal_code'] ?? '');
             $department  = trim($input['department'] ?? '');
             $position    = trim($input['position'] ?? '');
-
             $avatarPath = null;
 
             if (!empty($input['avatar']) && str_starts_with($input['avatar'], 'data:image/')) {
                 $avatarData = explode(',', $input['avatar'])[1] ?? '';
                 $decoded = base64_decode($avatarData);
                 if (!$decoded) throw new Exception('Failed to decode avatar');
-
                 if (strpos($input['avatar'], 'image/jpeg') !== false) $ext = 'jpg';
                 elseif (strpos($input['avatar'], 'image/png') !== false) $ext = 'png';
                 elseif (strpos($input['avatar'], 'image/gif') !== false) $ext = 'gif';
                 else throw new Exception('Invalid image format');
-
                 $uploadDir = __DIR__ . '/../uploads/avatars/';
                 if (!is_dir($uploadDir)) mkdir($uploadDir, 0777, true);
-
                 $newFileName = $user_id . '_' . time() . '.' . $ext;
                 $fullPath = $uploadDir . $newFileName;
-
                 if (!file_put_contents($fullPath, $decoded)) {
                     throw new Exception('Failed to save avatar');
                 }
-
                 $avatarPath = 'uploads/avatars/' . $newFileName;
             }
 
@@ -130,7 +123,6 @@ try {
                 $stmt2->bind_param("i", $user_id);
                 $stmt2->execute();
                 $data = $stmt2->get_result()->fetch_assoc();
-
                 $response = ['success' => true, 'message' => 'Personal info updated successfully', 'data' => $data];
             } else {
                 $response['message'] = 'Failed to update personal info';
@@ -141,7 +133,6 @@ try {
             $response['message'] = 'Invalid action';
             break;
     }
-
 } catch (Exception $e) {
     $response = ['success' => false, 'message' => $e->getMessage()];
 }

@@ -1,29 +1,12 @@
-const apiBase = "http://localhost/HR-project/api";
-const expenseApi = `${apiBase}/expenses.php`;
-const userApi = `${apiBase}/personal-data.php`;
+import { safeFetch } from './helper/safeFetch.js';
+
+const expenseApi = "expenses.php";
+const userApi = "personal-data.php";
 
 let allExpenses = [];
 let currentUser = null;
 
 document.addEventListener("DOMContentLoaded", initialize);
-
-async function postData(url, data = {}, method = "POST") {
-  try {
-    const options = { method, credentials: "include" };
-    if (method.toUpperCase() === "POST") {
-      options.headers = { "Content-Type": "application/json" };
-      options.body = JSON.stringify(data);
-    } else if (method.toUpperCase() === "GET") {
-      const params = new URLSearchParams(data).toString();
-      url += params ? `?${params}` : "";
-    }
-    const res = await fetch(url, options);
-    return await res.json();
-  } catch (err) {
-    console.error("Network error:", err);
-    return { success: false, message: "Network error" };
-  }
-}
 
 async function initialize() {
   await fetchUser();
@@ -32,7 +15,7 @@ async function initialize() {
 }
 
 async function fetchUser() {
-  const res = await postData(userApi, { action: "get-user" });
+  const res = await safeFetch(userApi, "get-user");
   if (!res?.success) {
     currentUser = { role: "employee" };
   } else {
@@ -45,16 +28,17 @@ async function fetchUser() {
 function renderRoleSection() {
   const section = document.getElementById("role-based-section");
   if (!section) return;
+
   if (!currentUser) {
-    section.innerHTML =
-      "<p class='text-center text-gray-500'>Please login to manage expenses.</p>";
+    section.innerHTML = "<p class='text-center text-gray-500'>Please login to manage expenses.</p>";
     return;
   }
+
   if (!["employee", "sales"].includes(currentUser.role)) {
-    section.innerHTML =
-      "<p class='text-center text-gray-500'>You cannot add expenses.</p>";
+    section.innerHTML = "<p class='text-center text-gray-500'>You cannot add expenses.</p>";
     return;
   }
+
   section.innerHTML = `
     <h2 class="text-lg font-semibold mb-4">Add Expense</h2>
     <form id="expense-form" class="space-y-4">
@@ -74,33 +58,25 @@ function renderRoleSection() {
       </button>
     </form>
   `;
-  document
-    .getElementById("expense-form")
-    ?.addEventListener("submit", addExpense);
+  document.getElementById("expense-form")?.addEventListener("submit", addExpense);
 }
 
 async function fetchExpenses() {
-  const res = await postData(expenseApi, { action: "list" });
-  if (!res?.success) {
-    return;
-  }
+  const res = await safeFetch(expenseApi, "list");
+  if (!res?.success) return;
   allExpenses = res.expenses || [];
   renderSummary();
   renderExpenses(allExpenses);
 }
 
 function renderSummary() {
-  const totalAll = allExpenses.length;
   const totalPending = allExpenses.filter((e) => e.status === "pending").length;
   const totalApproved = allExpenses.filter((e) => e.status === "approved").length;
   const totalRejected = allExpenses.filter((e) => e.status === "rejected").length;
   const sumAll = allExpenses.reduce((sum, e) => sum + parseFloat(e.amount), 0);
-  const sumPending = allExpenses
-    .filter((e) => e.status === "pending")
-    .reduce((sum, e) => sum + parseFloat(e.amount), 0);
-  const sumApproved = allExpenses
-    .filter((e) => e.status === "approved")
-    .reduce((sum, e) => sum + parseFloat(e.amount), 0);
+  const sumPending = allExpenses.filter((e) => e.status === "pending").reduce((sum, e) => sum + parseFloat(e.amount), 0);
+  const sumApproved = allExpenses.filter((e) => e.status === "approved").reduce((sum, e) => sum + parseFloat(e.amount), 0);
+
   document.getElementById("total-all").textContent = `$${sumAll.toFixed(2)}`;
   document.getElementById("total-review").textContent = `$${sumPending.toFixed(2)}`;
   document.getElementById("total-approved").textContent = `$${sumApproved.toFixed(2)}`;
@@ -114,41 +90,32 @@ function renderExpenses(list) {
   if (!container) return;
   container.innerHTML = "";
   if (list.length === 0) {
-    container.innerHTML =
-      "<p class='text-center text-gray-500'>No expenses found.</p>";
+    container.innerHTML = "<p class='text-center text-gray-500'>No expenses found.</p>";
     return;
   }
+
   list.forEach((exp) => {
     const li = document.createElement("li");
     li.className = `bg-white rounded-lg shadow p-4 border-l-4 ${
-      exp.status === "approved"
-        ? "border-green-500"
-        : exp.status === "pending"
-        ? "border-yellow-500"
-        : "border-red-500"
+      exp.status === "approved" ? "border-green-500" :
+      exp.status === "pending" ? "border-yellow-500" : "border-red-500"
     } hover:shadow-xl transition`;
+
     const date = new Date(exp.created_at).toLocaleDateString();
     li.innerHTML = `
       <p class="text-sm text-gray-500 mb-1">${date}</p>
       <div class="flex justify-between items-center">
         <div>
-          <p class="font-semibold text-gray-900">$${parseFloat(
-            exp.amount
-          ).toFixed(2)}</p>
+          <p class="font-semibold text-gray-900">$${parseFloat(exp.amount).toFixed(2)}</p>
           <p class="text-gray-700">${exp.reason}</p>
         </div>
         <div class="flex items-center gap-2">
           <span class="px-2 py-1 text-xs rounded ${
-            exp.status === "approved"
-              ? "bg-green-100 text-green-600"
-              : exp.status === "pending"
-              ? "bg-yellow-100 text-yellow-600"
-              : "bg-red-100 text-red-600"
+            exp.status === "approved" ? "bg-green-100 text-green-600" :
+            exp.status === "pending" ? "bg-yellow-100 text-yellow-600" : "bg-red-100 text-red-600"
           }">${exp.status}</span>
           ${
-            currentUser &&
-            ["employee", "sales"].includes(currentUser.role) &&
-            exp.status === "pending"
+            currentUser && ["employee", "sales"].includes(currentUser.role) && exp.status === "pending"
               ? `<button data-id="${exp.id}" class="cancel-btn text-xs text-red-600 hover:underline">Cancel</button>`
               : ""
           }
@@ -157,16 +124,14 @@ function renderExpenses(list) {
     `;
     container.appendChild(li);
   });
+
   document.querySelectorAll(".cancel-btn").forEach((btn) => {
     btn.addEventListener("click", async () => {
       const id = btn.dataset.id;
       if (!confirm("Cancel this expense?")) return;
-      const res = await postData(expenseApi, { action: "delete", id });
-      if (res.success) {
-        await fetchExpenses();
-      } else {
-        alert(res.message || "Failed to cancel expense");
-      }
+      const res = await safeFetch(expenseApi, "delete", { id });
+      if (res.success) await fetchExpenses();
+      else alert(res.message || "Failed to cancel expense");
     });
   });
 }
@@ -179,11 +144,7 @@ async function addExpense(e) {
     alert("Please enter amount and reason.");
     return;
   }
-  const res = await postData(expenseApi, {
-    action: "create",
-    amount,
-    reason,
-  });
+  const res = await safeFetch(expenseApi, "create", { amount, reason });
   if (res.success) {
     document.getElementById("expense-form").reset();
     await fetchExpenses();

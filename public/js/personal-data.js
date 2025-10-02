@@ -105,4 +105,9 @@ personalForm.addEventListener("submit", async (e) => {
   }
 });
 
+saveBtn.addEventListener("click", async (e) => {
+  e.preventDefault();
+  personalForm.requestSubmit();
+});
+
 document.addEventListener("DOMContentLoaded", loadUserData);
