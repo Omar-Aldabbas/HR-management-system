@@ -1,133 +1,217 @@
 import { safeFetch } from "./helper/safeFetch.js";
 
-document.addEventListener("DOMContentLoaded", loadCurrentUser);
-
 let currentUser = null;
-let employees = [];
+let payrolls = [];
+let filteredPayrolls = [];
 
-/** Load the logged in user */
+document.addEventListener("DOMContentLoaded", init);
+
+async function init() {
+  await loadCurrentUser();
+  await loadPayrolls();
+  setupEvents();
+  prefillDate();
+}
+
 async function loadCurrentUser() {
   const res = await safeFetch("users.php", "get");
-  if (res.success && res.data) {
-    currentUser = res.data;
-    renderUI();
-
-    // HR or HR manager can load all employees
-    if (["hr", "hr_manager"].includes(currentUser.role.toLowerCase())) {
-      await loadEmployees();
-    }
-
-    // Everyone can see their own payrolls, HR/manager see more
-    await loadPayrolls();
-  } else {
-    alert(res.message || "Failed to load current user");
-  }
+  if (res.success) currentUser = res.data;
+  adjustUIByRole();
 }
 
-/** Load employees list for HR/manager */
-async function loadEmployees() {
-  const res = await safeFetch("users.php", "list");
-  if (res.success && Array.isArray(res.users)) {
-    employees = res.users;
-    renderEmployeeOptions();
-  }
-}
-
-/** Load payrolls for current user / dept / all */
-async function loadPayrolls() {
+async function loadPayrolls(view = "my") {
+  if (!currentUser) return;
   const res = await safeFetch("payrolls.php", "list");
-  if (res.success && Array.isArray(res.payrolls)) {
-    renderPayrolls(res.payrolls);
-  } else {
-    const tbody = document.getElementById("payrolls-body");
-    tbody.innerHTML = `<tr><td colspan="10" class="text-center p-4">No payrolls found</td></tr>`;
+  if (!res.success) {
+    document.getElementById("payroll-container").innerHTML =
+      "<p class='text-red-500 text-center py-6'>Failed to load payrolls</p>";
+    return;
+  }
+  payrolls = res.payrolls;
+
+  if (view === "my")
+    filteredPayrolls = payrolls.filter((p) => p.user_id === currentUser.id);
+  else
+    filteredPayrolls = payrolls.sort(
+      (a, b) => b.year - a.year || b.month - a.month
+    );
+
+  renderPayrolls();
+}
+
+function renderPayrolls() {
+  const container = document.getElementById("payroll-container");
+  if (!filteredPayrolls.length) {
+    container.innerHTML =
+      "<p class='text-gray-500 text-center py-6'>No payrolls found</p>";
+    return;
+  }
+  container.innerHTML = filteredPayrolls
+    .map(
+      (p) => `
+    <div class="bg-white shadow rounded-xl p-4 border w-full transition hover:shadow-lg">
+      <div class="flex justify-between items-center cursor-pointer" onclick="toggleDetails(${
+        p.id
+      })">
+        <div>
+          <h3 class="text-lg font-semibold text-blue-900">${p.name} (${
+        p.role
+      })</h3>
+          <p class="text-sm text-gray-500">${p.department} - ${p.month}/${
+        p.year
+      }</p>
+        </div>
+        <span class="text-sm text-gray-700 font-semibold">$${parseFloat(
+          p.net_salary || 0
+        ).toFixed(2)}</span>
+      </div>
+      <div id="details-${
+        p.id
+      }" class="mt-3 hidden text-gray-700 space-y-1 text-sm">
+        <p><strong>Base Salary:</strong> $${parseFloat(
+          p.base_salary || 0
+        ).toFixed(2)}</p>
+        <p><strong>Additions:</strong> $${parseFloat(p.additions || 0).toFixed(
+          2
+        )}</p>
+        <p><strong>Deductions:</strong> $${parseFloat(
+          p.deductions || 0
+        ).toFixed(2)}</p>
+        <p><strong>Taxes:</strong> $${parseFloat(p.taxes || 0).toFixed(2)}</p>
+        <p><strong>Approved Expenses:</strong> $${parseFloat(
+          p.approved_expenses || 0
+        ).toFixed(2)}</p>
+        <p><strong>Net Salary:</strong> $${parseFloat(
+          p.net_salary || 0
+        ).toFixed(2)}</p>
+        <p><strong>Approved By:</strong> ${p.approved_by_name || "Pending"}</p>
+        <p><strong>Last Payment Date:</strong> ${
+          p.last_payment_date || "N/A"
+        }</p>
+      </div>
+    </div>
+  `
+    )
+    .join("");
+}
+
+window.toggleDetails = function (id) {
+  const details = document.getElementById(`details-${id}`);
+  if (details) details.classList.toggle("hidden");
+};
+
+function setupEvents() {
+  if (!currentUser) return;
+
+  const role = currentUser.role.toLowerCase();
+  const hrRoles = ["hr", "hr_manager", "admin"];
+  if (hrRoles.includes(role)) {
+    document
+      .getElementById("btn-my-payrolls")
+      ?.addEventListener("click", () => loadPayrolls("my"));
+    document
+      .getElementById("btn-all-payrolls")
+      ?.addEventListener("click", () => loadPayrolls("all"));
+    document
+      .getElementById("search-payrolls")
+      ?.addEventListener("input", (e) => {
+        const term = e.target.value.toLowerCase();
+        filteredPayrolls = payrolls.filter(
+          (p) =>
+            p.name.toLowerCase().includes(term) ||
+            (p.department && p.department.toLowerCase().includes(term))
+        );
+        renderPayrolls();
+      });
+    document.getElementById("add-payroll-btn")?.classList.remove("hidden");
+  }
+
+  document
+    .getElementById("add-payroll-btn")
+    ?.addEventListener("click", openPayrollModal);
+  document
+    .getElementById("close-payroll-modal")
+    ?.addEventListener("click", closePayrollModal);
+  document
+    .getElementById("payroll-form")
+    ?.addEventListener("submit", handlePayrollSubmit);
+
+  if (hrRoles.includes(role)) loadEmployeesOptions();
+}
+
+function adjustUIByRole() {
+  const role = currentUser.role.toLowerCase();
+  const hrRoles = ["hr", "hr_manager", "admin"];
+  if (!hrRoles.includes(role)) {
+    document.getElementById("btn-my-payrolls")?.classList.add("hidden");
+    document.getElementById("btn-all-payrolls")?.classList.add("hidden");
+    document.getElementById("search-payrolls")?.classList.add("hidden");
   }
 }
 
-/** Show/hide buttons depending on role */
-function renderUI() {
-  const addBtn = document.getElementById("add-payroll-btn");
-  if (["hr", "hr_manager"].includes(currentUser.role.toLowerCase())) {
-    addBtn.classList.remove("hidden");
-  } else {
-    addBtn.classList.add("hidden");
-  }
+function prefillDate() {
+  const now = new Date();
+  const yearInput = document.getElementById("payroll-year");
+  const monthInput = document.getElementById("payroll-month");
+  if (yearInput) yearInput.value = now.getFullYear();
+  if (monthInput) monthInput.value = now.getMonth() + 1;
 }
 
-/** Fill employee select dropdown */
-function renderEmployeeOptions() {
+async function loadEmployeesOptions() {
+  const res = await safeFetch("users.php", "list");
+  if (!res.success) return;
   const select = document.getElementById("employee-select");
   if (!select) return;
   select.innerHTML = `<option value="">Select Employee</option>`;
-  employees.forEach(emp => {
+  res.users.forEach((u) => {
     const opt = document.createElement("option");
-    opt.value = emp.id;
-    opt.textContent = `${emp.name} (${emp.department} - ${emp.role})`;
+    opt.value = u.id;
+    opt.textContent = `${u.name} (${u.department})`;
     select.appendChild(opt);
   });
 }
 
-/** Render payroll table rows */
-function renderPayrolls(payrolls) {
-  const tbody = document.getElementById("payrolls-body");
-  tbody.innerHTML = "";
-  payrolls.forEach(p => {
-    const tr = document.createElement("tr");
-    tr.innerHTML = `
-      <td class="border px-4 py-2">${p.name}</td>
-      <td class="border px-4 py-2">${p.department}</td>
-      <td class="border px-4 py-2">${p.role}</td>
-      <td class="border px-4 py-2">${p.year}-${p.month}</td>
-      <td class="border px-4 py-2">${p.base_salary}</td>
-      <td class="border px-4 py-2">${p.additions}</td>
-      <td class="border px-4 py-2">${p.deductions}</td>
-      <td class="border px-4 py-2">${p.taxes}</td>
-      <td class="border px-4 py-2">${p.net_salary}</td>
-      <td class="border px-4 py-2">${p.last_payment || "-"}</td>
-      <td class="border px-4 py-2">${p.approved_by || "-"}</td>
-    `;
-    tbody.appendChild(tr);
-  });
+function openPayrollModal() {
+  const modal = document.getElementById("payroll-modal");
+  modal.classList.remove("hidden");
+  modal.classList.add("flex");
 }
 
-/** Show form */
-document.getElementById("add-payroll-btn")?.addEventListener("click", () => {
-  document.getElementById("payroll-form-section").classList.remove("hidden");
-});
+function closePayrollModal() {
+  const modal = document.getElementById("payroll-modal");
+  modal.classList.add("hidden");
+  modal.classList.remove("flex");
+}
 
-/** Hide form */
-document.getElementById("close-form-btn")?.addEventListener("click", () => {
-  document.getElementById("payroll-form-section").classList.add("hidden");
-});
-
-/** Submit payroll form */
-document.getElementById("payroll-form")?.addEventListener("submit", async e => {
+async function handlePayrollSubmit(e) {
   e.preventDefault();
+  const employeeId = document.getElementById("employee-select")?.value;
+  if (!employeeId) return alert("Select an employee");
+  const base = parseFloat(document.getElementById("base-salary")?.value || 0);
+  const additions = parseFloat(
+    document.getElementById("additions")?.value || 0
+  );
+  const deductions = parseFloat(
+    document.getElementById("deductions")?.value || 0
+  );
+  const taxes = parseFloat(document.getElementById("taxes")?.value || 0);
+  const year = parseInt(document.getElementById("payroll-year")?.value || 0);
+  const month = parseInt(document.getElementById("payroll-month")?.value || 0);
 
-  const userId = parseInt(document.getElementById("employee-select").value);
-
-  if (!userId) {
-    alert("Please select an employee");
-    return;
-  }
-
-  const data = {
-    user_id: userId,
-    year: parseInt(document.getElementById("year").value),
-    month: parseInt(document.getElementById("month").value),
-    base_salary: parseFloat(document.getElementById("base-salary").value),
-    additions: parseFloat(document.getElementById("additions").value),
-    deductions: parseFloat(document.getElementById("deductions").value),
-    taxes: parseFloat(document.getElementById("taxes").value),
-  };
-
-  const res = await safeFetch("payrolls.php", "add", data);
+  const res = await safeFetch("payrolls.php", "add", {
+    user_id: employeeId,
+    base_salary: base,
+    additions,
+    deductions,
+    taxes,
+    year,
+    month,
+  });
 
   if (res.success) {
-    document.getElementById("payroll-form").reset();
-    document.getElementById("payroll-form-section").classList.add("hidden");
+    closePayrollModal();
     await loadPayrolls();
-  } else {
-    alert(res.message || "Failed to add payroll");
-  }
-});
+    document.getElementById("payroll-form")?.reset();
+    prefillDate();
+  } else alert(res.message || "Failed to submit payroll");
+}
