@@ -44,8 +44,8 @@ const loadUserData = async () => {
   personalForm.state.value = user.state || "";
   personalForm.country.value = user.country || "";
   personalForm.postal_code.value = user.postal_code || "";
-  personalForm.department.value = user.department || "";
-  personalForm.position.value = user.position || "";
+  document.getElementById("department").textContent = user.department || "";
+  document.getElementById("position").textContent = user.position || "";
 };
 
 avatarInput.addEventListener("change", () => {
