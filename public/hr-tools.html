@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HR Tools</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
+    <script type="module" src="js/navigation.js" defer></script>
+    <script type="module" src="js/hr-tools.js" defer></script>
+  </head>
+  <body class="bg-gray-100 text-gray-900 min-h-screen flex flex-col">
+    <header class="bg-blue-900 text-white py-4 shadow-md">
+      <h1 class="text-2xl font-bold text-center">HR Tools</h1>
+    </header>
+
+    <main class="flex-1 container mx-auto p-6">
+      <section class="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div class="flex gap-2 items-center">
+          <label for="department-filter" class="text-gray-700 font-medium">Filter by Department:</label>
+          <select id="department-filter" class="border border-gray-300 rounded px-2 py-1">
+            <option value="">All</option>
+            <option value="IT">IT</option>
+            <option value="HR">HR</option>
+            <option value="Sales">Sales</option>
+            <option value="Marketing">Marketing</option>
+            <option value="Finance">Finance</option>
+            <option value="Operations">Operations</option>
+            <option value="Support">Support</option>
+          </select>
+        </div>
+
+        <div class="flex gap-2 items-center">
+          <label for="search-name" class="text-gray-700 font-medium">Search by Name:</label>
+          <input
+            id="search-name"
+            type="text"
+            placeholder="Employee Name"
+            class="border border-gray-300 rounded px-2 py-1"
+          />
+        </div>
+      </section>
+
+      <section
+        id="hr-tools-container"
+        class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
+      >
+        <p class="text-gray-500 col-span-full">Loading users...</p>
+      </section>
+
+      <section id="edit-user-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-md">
+          <h2 class="text-xl font-semibold mb-4">Edit User</h2>
+          <form id="edit-user-form" class="flex flex-col gap-3">
+            <input type="hidden" id="edit-user-id" />
+            <label class="flex flex-col">
+              Name
+              <input type="text" id="edit-user-name" class="border border-gray-300 rounded px-2 py-1" disabled />
+            </label>
+            <label class="flex flex-col">
+              Position
+              <input type="text" id="edit-user-position" class="border border-gray-300 rounded px-2 py-1" />
+            </label>
+            <label class="flex flex-col">
+              Department
+              <select id="edit-user-department" class="border border-gray-300 rounded px-2 py-1">
+                <option value="IT">IT</option>
+                <option value="HR">HR</option>
+                <option value="Sales">Sales</option>
+                <option value="Marketing">Marketing</option>
+                <option value="Finance">Finance</option>
+                <option value="Operations">Operations</option>
+                <option value="Support">Support</option>
+              </select>
+            </label>
+            <div class="flex justify-end gap-2 mt-4">
+              <button type="button" id="close-edit-modal" class="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300">Cancel</button>
+              <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Save</button>
+            </div>
+          </form>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>

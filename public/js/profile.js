@@ -37,7 +37,7 @@ async function populateUser() {
 
     if (userNameEl)   userNameEl.textContent = fullName;
     if (userPosEl)    userPosEl.textContent = position;
-    if (userImgEl)    userImgEl.src = avatarSrc || 'default-avatar.png';
+    if (userImgEl)    userImgEl.src = avatarSrc || 'http://localhost/HR-project/uploads/avatars/default.png';
     if (contactName)  contactName.textContent = fullName;
     if (contactEmail) contactEmail.textContent = user.email || 'N/A';
     if (contactPhone) contactPhone.textContent = user.phone || 'N/A';

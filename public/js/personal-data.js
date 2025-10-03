@@ -34,7 +34,7 @@ const loadUserData = async () => {
   const user = res.data;
   avatarPreview.src = user.avatar
     ? `${apiBase.replace("/api", "")}/${user.avatar.replace(/^\/+/, "")}`
-    : "default-avatar.png";
+    : "'http://localhost/HR-project/uploads/avatars/default.png'";
 
   personalForm.full_name.value = user.full_name || "";
   personalForm.email.value = user.email || "";
@@ -44,7 +44,7 @@ const loadUserData = async () => {
   personalForm.state.value = user.state || "";
   personalForm.country.value = user.country || "";
   personalForm.postal_code.value = user.postal_code || "";
-  document.getElementById("department").textContent = user.department || "";
+  document.getElementById("department").textContent = user.department || "Other";
   document.getElementById("position").textContent = user.position || "";
 };
 
@@ -79,8 +79,8 @@ personalForm.addEventListener("submit", async (e) => {
     state: personalForm.state.value,
     country: personalForm.country.value,
     postal_code: personalForm.postal_code.value,
-    department: personalForm.department.value,
-    position: personalForm.position.value,
+    // department: personalForm.department.value,
+    // position: personalForm.position.value,
   };
 
   if (avatarInput.files[0]) {

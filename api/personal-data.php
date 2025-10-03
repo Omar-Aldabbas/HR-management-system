@@ -38,7 +38,7 @@ try {
     switch ($action) {
         case 'get':
             $stmt = $mysqli->prepare("
-                SELECT id, name AS full_name, email, phone, department, position,
+                SELECT id, name AS full_name, email, phone, department, position, avatar,
                        address, city, state, country, postal_code, avatar, role
                 FROM users WHERE id=? LIMIT 1
             ");

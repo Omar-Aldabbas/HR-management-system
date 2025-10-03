@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Manager Tool</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"
+    crossorigin="anonymous"
+    referrerpolicy="no-referrer"
+  />
+  <script type="module" src="js/manager-tools.js" defer></script>
+  <script type="module" src="./js/navigation.js" defer></script>
+
+</head>
+<body class="bg-gray-100 text-gray-900 min-h-screen flex flex-col">
+
+  <header class="bg-blue-900 text-white py-4 shadow-md">
+    <h1 class="text-2xl font-bold text-center">Manager Dashboard</h1>
+  </header>
+
+  <main class="flex-1 container mx-auto p-6">
+    <section class="mb-6 flex flex-col sm:flex-row items-start sm:items-center gap-3 flex-wrap">
+      <input id="department-filter" type="text" placeholder="Filter by department" class="px-4 py-2 rounded-lg border w-full sm:w-auto focus:ring-2 focus:ring-blue-400">
+      <input id="search-name" type="text" placeholder="Search by name" class="px-4 py-2 rounded-lg border w-full sm:w-auto focus:ring-2 focus:ring-blue-400">
+      <button id="btn-add-task" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">Add Task</button>
+      <button id="btn-add-target" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition">Add Target</button>
+      <button id="btn-add-meeting" class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition">Add Meeting</button>
+    </section>
+
+    <section class="mb-6 space-y-4">
+      <form id="task-form" class="bg-white p-6 rounded-2xl shadow-md hidden space-y-4">
+        <h2 class="text-xl font-semibold text-gray-800">Assign Task</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <select id="task-employee" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400"></select>
+          <input id="task-title" type="text" placeholder="Task Title" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400" required>
+          <textarea id="task-desc" placeholder="Description" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400 col-span-full"></textarea>
+          <input id="task-deadline" type="date" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400">
+          <select id="task-priority" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400">
+            <option value="low">Low</option>
+            <option value="medium" selected>Medium</option>
+            <option value="high">High</option>
+          </select>
+        </div>
+        <button type="submit" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">Assign Task</button>
+      </form>
+
+      <form id="target-form" class="bg-white p-6 rounded-2xl shadow-md hidden space-y-4">
+        <h2 class="text-xl font-semibold text-gray-800">Assign Target</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <select id="target-employee" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-400"></select>
+          <input id="target-title" type="text" placeholder="Target Title" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-400" required>
+          <textarea id="target-desc" placeholder="Description" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-400 col-span-full"></textarea>
+          <input id="target-amount" type="number" step="0.01" placeholder="Target Amount" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-400" required>
+          <input id="target-deadline" type="date" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-400" required>
+        </div>
+        <button type="submit" class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition">Assign Target</button>
+      </form>
+
+      <form id="meeting-form" class="bg-white p-6 rounded-2xl shadow-md hidden space-y-4">
+        <h2 class="text-xl font-semibold text-gray-800">Schedule Meeting</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <select id="meeting-participants" multiple class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-purple-400"></select>
+          <input id="meeting-title" type="text" placeholder="Meeting Title" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-purple-400" required>
+          <textarea id="meeting-desc" placeholder="Description" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-purple-400 col-span-full"></textarea>
+          <input id="meeting-start" type="datetime-local" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-purple-400" required>
+          <input id="meeting-end" type="datetime-local" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-purple-400" required>
+        </div>
+        <button type="submit" class="px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition">Schedule Meeting</button>
+      </form>
+    </section>
+
+    <section id="hr-tools-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"></section>
+  </main>
+</body>
+</html>
