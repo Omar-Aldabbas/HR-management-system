@@ -1,73 +1,124 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Attendance</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
-  <link rel="stylesheet" href="css/custom.css" />
-  <script type="module" src="js/attendance.js" defer></script>
-  <script type="module" src="js/navigation.js" defer></script>
-</head>
-<body class="bg-gray-100 text-gray-900 min-h-screen flex flex-col">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Attendance</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
+    <link rel="stylesheet" href="css/custom.css" />
+    <script type="module" src="js/navigation.js" defer></script>
+    <script type="module" src="js/attendance.js" defer></script>
+  </head>
 
-  <header class="sticky top-0 z-10 flex items-center bg-gradient-to-r from-blue-800 to-blue-900 text-white shadow-lg px-4 py-3">
-    <h1 class="flex-1 text-center text-2xl font-bold tracking-widest">ATTENDANCE</h1>
-    <div class="w-6"></div>
-  </header>
-
-  <main class="flex-1 container mx-auto px-4 sm:px-6 lg:px-8 space-y-6 mt-6">
-
-    <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
-      <div class="bg-white rounded-3xl shadow-lg p-6 text-center hover:shadow-2xl transition">
-        <p class="text-sm text-gray-400 uppercase tracking-wider">Date</p>
-        <p id="current-date" class="text-xl sm:text-2xl font-extrabold mt-2">--/--/----</p>
+  <body class="bg-gray-50 text-gray-900 min-h-screen flex flex-col font-inter">
+    <header
+      class="relative w-full z-40 mt-16 bg-white/90 backdrop-blur-md border-b border-gray-200 shadow-sm transition-all duration-300"
+    >
+      <div
+        class="max-w-6xl mx-auto flex items-center justify-center px-6 py-5 text-center"
+      >
+        <h1 class="text-2xl font-semibold text-blue-900 tracking-wide">
+          Attendance
+        </h1>
       </div>
-      <div class="bg-white rounded-3xl shadow-lg p-6 text-center hover:shadow-2xl transition">
-        <p class="text-sm text-gray-400 uppercase tracking-wider">Time</p>
-        <p id="current-time" class="text-xl sm:text-2xl font-extrabold mt-2">--:--:--</p>
+    </header>
+
+    <main
+      class="flex-1 container mx-auto px-4 sm:px-6 lg:px-8 pt-10 pb-16 space-y-8"
+    >
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+        <div
+          class="bg-white/90 backdrop-blur-sm border border-gray-200 p-6 rounded-2xl shadow-sm hover:shadow-md transition-all duration-200 text-center"
+        >
+          <p class="text-sm text-gray-400 uppercase tracking-wider">Date</p>
+          <p
+            id="current-date"
+            class="text-xl sm:text-2xl font-bold text-blue-900 mt-2"
+          >
+            --/--/----
+          </p>
+        </div>
+        <div
+          class="bg-white/90 backdrop-blur-sm border border-gray-200 p-6 rounded-2xl shadow-sm hover:shadow-md transition-all duration-200 text-center"
+        >
+          <p class="text-sm text-gray-400 uppercase tracking-wider">Time</p>
+          <p
+            id="current-time"
+            class="text-xl sm:text-2xl font-bold text-blue-900 mt-2"
+          >
+            --:--:--
+          </p>
+        </div>
+        <div
+          class="bg-white/90 backdrop-blur-sm border border-gray-200 p-6 rounded-2xl shadow-sm hover:shadow-md transition-all duration-200 text-center"
+        >
+          <p class="text-sm text-gray-400 uppercase tracking-wider">Period</p>
+          <p
+            id="total-hours"
+            class="text-xl sm:text-2xl font-bold text-blue-900 mt-2"
+          >
+            --
+          </p>
+        </div>
       </div>
-      <div class="bg-white rounded-3xl shadow-lg p-6 text-center hover:shadow-2xl transition">
-        <p class="text-sm text-gray-400 uppercase tracking-wider">Time Icon</p>
-        <p id="total-hours" class="text-xl sm:text-2xl font-extrabold mt-2"></p>
+
+      <div class="flex flex-col sm:flex-row justify-center gap-4 mt-4">
+        <button
+          id="btn-checkin"
+          class="flex-1 px-6 py-4 bg-green-600 hover:bg-green-700 text-white rounded-2xl font-semibold shadow-sm transition hidden"
+        >
+          <i class="fa-solid fa-sign-in-alt mr-2"></i>Check In
+        </button>
+        <button
+          id="btn-break"
+          class="flex-1 px-6 py-4 bg-yellow-500 hover:bg-yellow-600 text-white rounded-2xl font-semibold shadow-sm transition hidden"
+        >
+          <i class="fa-solid fa-mug-hot mr-2"></i>Start Break
+        </button>
+        <button
+          id="btn-checkout"
+          class="flex-1 px-6 py-4 bg-red-600 hover:bg-red-700 text-white rounded-2xl font-semibold shadow-sm transition hidden"
+        >
+          <i class="fa-solid fa-sign-out-alt mr-2"></i>Check Out
+        </button>
       </div>
-    </div>
 
-    <div class="flex flex-col sm:flex-row justify-center gap-4 mt-6">
-      <button id="btn-checkin" class="flex-1 px-6 py-4 bg-green-600 hover:bg-green-700 text-white rounded-3xl font-semibold shadow-lg transition hidden">
-        Check In
-      </button>
-      <button id="btn-break" class="flex-1 px-6 py-4 bg-yellow-500 hover:bg-yellow-600 text-white rounded-3xl font-semibold shadow-lg transition hidden">
-        Start Break
-      </button>
-      <button id="btn-checkout" class="flex-1 px-6 py-4 bg-red-600 hover:bg-red-700 text-white rounded-3xl font-semibold shadow-lg transition hidden">
-        Check Out
-      </button>
-    </div>
+      <section
+        class="bg-white/90 backdrop-blur-sm border border-gray-200 p-6 rounded-2xl shadow-sm hover:shadow-md transition-all duration-200"
+      >
+        <h2
+          class="text-lg font-semibold mb-4 flex items-center space-x-2 text-blue-900"
+        >
+          <i class="fa-solid fa-clock text-blue-700 text-xl"></i>
+          <span>Today’s Session</span>
+        </h2>
+        <div id="today-session" class="space-y-3 text-gray-700">
+          <p id="session-status" class="font-medium text-gray-500">
+            No active session
+          </p>
+          <p id="session-clockin"></p>
+          <p id="session-clockout"></p>
+          <p id="session-breaks"></p>
+        </div>
+      </section>
 
-    <section class="bg-white p-6 rounded-3xl shadow-lg hover:shadow-2xl transition mt-6">
-      <h2 class="text-lg font-semibold mb-4 flex items-center space-x-3">
-        <i class="fa-solid fa-clock text-blue-700 text-xl"></i>
-        <span>Today’s Session</span>
-      </h2>
-      <div id="today-session" class="space-y-3 text-gray-700">
-        <p id="session-status" class="font-medium text-gray-500">No active session</p>
-        <p id="session-clockin"></p>
-        <p id="session-clockout"></p>
-        <p id="session-breaks"></p>
-      </div>
-    </section>
-
-    <section class="bg-white p-6 rounded-3xl shadow-lg hover:shadow-2xl transition mt-6">
-      <h2 class="text-lg font-semibold mb-4 flex items-center space-x-3">
-        <i class="fa-solid fa-history text-blue-700 text-xl"></i>
-        <span>Attendance History</span>
-      </h2>
-      <ul id="history-list" class="space-y-3 text-gray-700"></ul>
-    </section>
-
-  </main>
-
-</body>
+      <section
+        class="bg-white/90 backdrop-blur-sm border border-gray-200 p-6 rounded-2xl shadow-sm hover:shadow-md transition-all duration-200"
+      >
+        <h2
+          class="text-lg font-semibold mb-4 flex items-center space-x-2 text-blue-900"
+        >
+          <i class="fa-solid fa-history text-blue-700 text-xl"></i>
+          <span>Attendance History</span>
+        </h2>
+        <ul id="history-list" class="space-y-3 text-gray-700"></ul>
+      </section>
+    </main>
+  </body>
 </html>

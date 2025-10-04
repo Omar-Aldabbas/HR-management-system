@@ -27,13 +27,13 @@ function fmtDateTime(d) {
 
 function parseServerTime(str) {
   if (!str) return null;
-  const [datePart, timePart] = str.split(' ');
-  const [y, m, d] = datePart.split('-').map(Number);
-  const [h, min, sec] = timePart.split(':').map(Number);
+  const [datePart, timePart] = str.split(" ");
+  const [y, m, d] = datePart.split("-").map(Number);
+  const [h, min, sec] = timePart.split(":").map(Number);
   // create Date in UTC
   const utcDate = new Date(Date.UTC(y, m - 1, d, h, min, sec));
-  // add 1 hour 47 minutes
-  return new Date(utcDate.getTime() - (2*3600 + 0*60) * 1000);
+  // add 1 hour 47 minutes (this is old i dont know if its correct any more php store weird times)
+  return new Date(utcDate.getTime() - (2 * 3600 + 0 * 60) * 1000);
 }
 
 function getTimeIcon() {
@@ -128,18 +128,25 @@ async function fetchHistory() {
 
     const li = document.createElement("li");
     li.className =
-      "bg-white p-3 rounded-lg shadow flex justify-between items-center";
+      "bg-white/90 backdrop-blur-sm border border-gray-200 p-4 rounded-2xl shadow-sm hover:shadow-md transition-all duration-200 flex justify-between items-center";
+
     li.innerHTML = `
-      <div>
-        <p class="font-semibold">${item.date}</p>
-        <p>In: ${fmtDateTime(clockIn)}</p>
-        <p>Out: ${clockOut ? fmtDateTime(clockOut) : ""}</p>
-        <p>Breaks: ${item.break_minutes || 0} mins</p>
-      </div>
-      <div>Total: ${h.toString().padStart(2, "0")}:${m
+    <div class="text-sm text-gray-700 space-y-1">
+      <p class="font-semibold text-blue-900">${item.date}</p>
+      <p><span class="text-gray-500">In:</span> ${fmtDateTime(clockIn)}</p>
+      <p><span class="text-gray-500">Out:</span> ${
+        clockOut ? fmtDateTime(clockOut) : "--"
+      }</p>
+      <p><span class="text-gray-500">Breaks:</span> <span class="font-medium text-yellow-600">${
+        item.break_minutes || 0
+      } mins</span></p>
+    </div>
+    <div class="text-right text-blue-900 font-semibold text-sm bg-blue-50 px-3 py-2 rounded-lg border border-blue-100 shadow-inner">
+      ${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}:${s
       .toString()
-      .padStart(2, "0")}:${s.toString().padStart(2, "0")}</div>
-    `;
+      .padStart(2, "0")}
+    </div>
+  `;
     list.appendChild(li);
   });
 

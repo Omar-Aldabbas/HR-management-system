@@ -5,13 +5,13 @@ const container = document.getElementById("department-container");
 async function loadDepartment() {
   const userRes = await safeFetch("department.php", "get");
   if (!userRes.success || !userRes.data) {
-    container.innerHTML = `<p class="text-red-500">Failed to load user info</p>`;
+    container.innerHTML = `<p class="text-red-600 text-center font-medium">Failed to load user info</p>`;
     return;
   }
 
   const listRes = await safeFetch("department.php", "list");
   if (!listRes.success || !listRes.users) {
-    container.innerHTML = `<p class="text-red-500">Failed to load department members</p>`;
+    container.innerHTML = `<p class="text-red-600 text-center font-medium">Failed to load department members</p>`;
     return;
   }
 
@@ -27,67 +27,74 @@ function avatarUrl(user) {
 
 function createCard(user) {
   const card = document.createElement("article");
-  card.className = "bg-white rounded-lg shadow p-4 flex flex-row items-center gap-4 w-full";
+  card.className =
+    "bg-white/90 backdrop-blur-sm border border-gray-200 p-5 rounded-2xl shadow-sm hover:shadow-md transition-all duration-300 flex items-center gap-5";
 
   const img = document.createElement("img");
   img.src = avatarUrl(user);
   img.alt = user.name || "Avatar";
-  img.className = "w-20 h-20 rounded-full object-cover border-2 border-gray-200 flex-shrink-0";
+  img.className =
+    "w-20 h-20 rounded-full object-cover border-2 border-blue-100 shadow-sm flex-shrink-0";
 
-  const infoWrap = document.createElement("div");
-  infoWrap.className = "flex-1 min-w-0 flex flex-col justify-center gap-1";
+  const info = document.createElement("div");
+  info.className = "flex flex-col flex-1 min-w-0";
 
-  const head = document.createElement("div");
-  head.className = "flex justify-between items-center w-full";
+  const topRow = document.createElement("div");
+  topRow.className = "flex justify-between items-start flex-wrap gap-2";
 
-  const textCol = document.createElement("div");
-  textCol.className = "overflow-visible";
+  const nameWrap = document.createElement("div");
 
   const nameEl = document.createElement("h3");
-  nameEl.className = "text-lg font-semibold text-gray-900 leading-tight break-words";
+  nameEl.className =
+    "text-lg font-semibold text-blue-900 leading-tight break-words";
   nameEl.textContent = user.name || "No name";
 
   const posEl = document.createElement("p");
-  posEl.className = "text-sm text-gray-600 mt-1 break-words";
+  posEl.className = "text-sm text-gray-600 mt-1";
   posEl.textContent = user.position || "-";
 
-  textCol.appendChild(nameEl);
-  textCol.appendChild(posEl);
+  nameWrap.appendChild(nameEl);
+  nameWrap.appendChild(posEl);
 
-  const badgeWrap = document.createElement("div");
-  badgeWrap.className = "flex gap-2 flex-wrap items-center";
+  const badges = document.createElement("div");
+  badges.className = "flex gap-2 flex-wrap items-center";
 
   if (["manager", "team_lead"].includes((user.role || "").toLowerCase())) {
-    const roleBadge = document.createElement("div");
-    roleBadge.className = "px-3 py-1 text-xs font-bold bg-blue-100 text-blue-700 rounded whitespace-nowrap";
-    roleBadge.textContent = "Manager";
-    badgeWrap.appendChild(roleBadge);
+    const badge = document.createElement("span");
+    badge.className =
+      "px-3 py-1 text-xs font-semibold bg-blue-100 text-blue-800 rounded-full";
+    badge.textContent = "Manager";
+    badges.appendChild(badge);
   }
 
-  head.appendChild(textCol);
-  head.appendChild(badgeWrap);
+  topRow.appendChild(nameWrap);
+  topRow.appendChild(badges);
 
-  const status = document.createElement("p");
-  status.className = `mt-1 text-sm font-medium ${
-    user.on_leave_today == 1 ? "text-red-700" : "text-green-700"
-  }`;
-  status.textContent = user.on_leave_today == 1 ? "On Leave Today" : "Available";
+  const status = document.createElement("span");
+  status.className = `mt-2 text-sm font-medium ${
+    user.on_leave_today == 1
+      ? "text-red-600 bg-red-50 border border-red-100"
+      : "text-green-700 bg-green-50 border border-green-100"
+  } px-3 py-1 rounded-full w-fit`;
+  status.textContent =
+    user.on_leave_today == 1 ? "On Leave Today" : "Available";
 
-  infoWrap.appendChild(head);
-  infoWrap.appendChild(status);
+  info.appendChild(topRow);
+  info.appendChild(status);
 
   card.appendChild(img);
-  card.appendChild(infoWrap);
+  card.appendChild(info);
 
   return card;
 }
 
 function clearContainer() {
-  while (container.firstChild) container.removeChild(container.firstChild);
+  container.innerHTML = "";
 }
 
 function ensureGridClasses() {
-  container.className = "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6";
+  container.className =
+    "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 mt-6";
 }
 
 async function renderUsers(users) {
@@ -95,8 +102,7 @@ async function renderUsers(users) {
   ensureGridClasses();
 
   for (const user of users) {
-    const card = createCard(user);
-    container.appendChild(card);
+    container.appendChild(createCard(user));
   }
 }
 

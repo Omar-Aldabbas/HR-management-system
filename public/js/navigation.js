@@ -80,6 +80,8 @@ function desktopMenuHtml(itemsHtml) {
 
 function buildItems(role) {
   const base = [
+    { href: "companyDashboard.html", icon: "fa-tachometer", label: "Company Dashboard" },
+    { href: "department.html", icon: "fa-building", label: "Department" },
     { href: "home.html", icon: "fa-house", label: "Home" },
     { href: "attendance.html", icon: "fa-clock", label: "Attendance" },
     { href: "analytics.html", icon: "fa-chart-line", label: "Analytics" },

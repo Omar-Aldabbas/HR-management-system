@@ -1,61 +1,113 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Expenses</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="css/custom.css" />
-  <script type="module" src="./js/expenses.js" defer></script>
-  <script type="module" src="./js/navigation.js" defer></script>
-</head>
-<body class="bg-gray-100 text-gray-900 min-h-screen font-mono">
-
-  <header class="bg-black text-white p-6 shadow-lg">
-    <h1 class="text-2xl font-bold tracking-widest text-center">EXPENSES</h1>
-    <p class="text-gray-300 text-center mt-1">Claim and view your expenses</p>
-  </header>
-
-  <main class="container mx-auto p-6 space-y-8">
-
-    <section id="expense-stats" class="grid grid-cols-1 sm:grid-cols-3 gap-6">
-      <div class="bg-white shadow rounded-xl p-6 text-center hover:shadow-xl transition">
-        <h3 class="font-semibold text-gray-600">All</h3>
-        <p id="total-all" class="text-2xl font-bold mt-2">0</p>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Expenses</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+      crossorigin="anonymous"
+    />
+    <link rel="stylesheet" href="css/custom.css" />
+    <script type="module" src="./js/navigation.js" defer></script>
+    <script type="module" src="./js/expenses.js" defer></script>
+  </head>
+  <body
+    class="bg-[var(--onyx-bg-base)] text-[var(--onyx-text-primary)] min-h-screen font-inter flex flex-col"
+  >
+    <header
+      class="relative w-full z-40 mt-16 bg-white/90 backdrop-blur-md border-b border-[var(--onyx-border)] shadow-sm transition-all duration-300"
+    >
+      <div
+        class="max-w-6xl mx-auto items-center justify-between px-6 py-5"
+      >
+        <h1
+          class="text-2xl font-semibold text-blue-900 tracking-wide text-center flex-1 uppercase"
+        >
+          Expenses
+        </h1>
+        <div class="w-10"></div>
       </div>
-      <div class="bg-white shadow rounded-xl p-6 text-center hover:shadow-xl transition">
-        <h3 class="font-semibold text-gray-600">In Review</h3>
-        <p id="total-review" class="text-2xl font-bold mt-2">0</p>
-      </div>
-      <div class="bg-white shadow rounded-xl p-6 text-center hover:shadow-xl transition">
-        <h3 class="font-semibold text-gray-600">Approved</h3>
-        <p id="total-approved" class="text-2xl font-bold mt-2">0</p>
-      </div>
-    </section>
+    </header>
 
-    <section id="role-based-section" class="bg-white shadow rounded-xl p-6 hover:shadow-xl transition">nothing showen here</section>
+    <main
+      class="flex-1 container mx-auto px-4 sm:px-6 lg:px-8 pt-10 pb-16 space-y-8"
+    >
+      <section class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+        <div
+          class="bg-white/90 backdrop-blur-sm border border-[var(--onyx-border)] p-6 rounded-2xl shadow-sm hover:shadow-md transition-all duration-200 text-center"
+        >
+          <h3 class="text-[var(--onyx-text-secondary)] font-medium">All</h3>
+          <p id="total-all" class="text-2xl font-bold mt-2">0</p>
+        </div>
+        <div
+          class="bg-white/90 backdrop-blur-sm border border-[var(--onyx-border)] p-6 rounded-2xl shadow-sm hover:shadow-md transition-all duration-200 text-center"
+        >
+          <h3 class="text-[var(--onyx-text-secondary)] font-medium">
+            In Review
+          </h3>
+          <p id="total-review" class="text-2xl font-bold mt-2">0</p>
+        </div>
+        <div
+          class="bg-white/90 backdrop-blur-sm border border-[var(--onyx-border)] p-6 rounded-2xl shadow-sm hover:shadow-md transition-all duration-200 text-center"
+        >
+          <h3 class="text-[var(--onyx-text-secondary)] font-medium">
+            Approved
+          </h3>
+          <p id="total-approved" class="text-2xl font-bold mt-2">0</p>
+        </div>
+      </section>
 
-    <section class="bg-white shadow rounded-xl p-6 hover:shadow-xl transition">
-      <div class="flex flex-wrap justify-center gap-4 mb-4">
-        <button data-status="all" class="filter-btn px-6 py-2 bg-green-800 text-white font-semibold hover:bg-yellow-700 rounded-lg transition">
-          All
-          <!-- All (<span id="count-all">0</span>) -->
-        </button>
-        <button  data-status="pending" class="filter-btn px-6 py-2 bg-cyan-900 text-white font-semibold hover:bg-cyan-800 rounded-lg transition">
-          Review (<span id="count-review">0</span>)
-        </button>
-        <button  data-status="approved" class="filter-btn px-6 py-2 bg-fuchsia-950 text-white font-semibold hover:bg-fuchsia-800 rounded-lg transition">
-          Approved (<span id="count-approved">0</span>)
-        </button>
-        <button  data-status="rejected" class="filter-btn px-6 py-2 bg-red-700 text-white font-semibold hover:bg-red-600 rounded-lg transition">
-          Rejected (<span id="count-rejected">0</span>)
-        </button>
-      </div>
-      <ul id="expense-list" class="space-y-4"></ul>
-    </section>
+      <section
+        id="role-based-section"
+        class="bg-white/90 backdrop-blur-sm border border-[var(--onyx-border)] p-6 rounded-2xl shadow-sm text-center text-[var(--onyx-text-secondary)]"
+      >
+        No role-specific data available
+      </section>
 
-  </main>
+      <section
+        class="bg-white/90 backdrop-blur-sm border border-[var(--onyx-border)] p-6 rounded-2xl shadow-sm space-y-6"
+      >
+        <div class="flex flex-wrap justify-center sm:justify-start gap-3">
+          <button
+            data-status="all"
+            class="btn-onyx-primary flex items-center gap-2"
+          >
+            <i class="fa-solid fa-layer-group"></i>
+            <span>All</span>
+          </button>
+          <button
+            data-status="pending"
+            class="btn-onyx-accent flex items-center gap-2"
+          >
+            <i class="fa-solid fa-hourglass-half"></i>
+            <span>Review (<span id="count-review">0</span>)</span>
+          </button>
+          <button
+            data-status="approved"
+            class="btn-onyx-secondary flex items-center gap-2"
+          >
+            <i class="fa-solid fa-circle-check text-[var(--onyx-accent-1)]"></i>
+            <span>Approved (<span id="count-approved">0</span>)</span>
+          </button>
+          <button
+            data-status="rejected"
+            class="btn-onyx-secondary flex items-center gap-2 text-red-600 border-red-200 hover:bg-red-50"
+          >
+            <i class="fa-solid fa-circle-xmark"></i>
+            <span>Rejected (<span id="count-rejected">0</span>)</span>
+          </button>
+        </div>
 
-</body>
+        <ul
+          id="expense-list"
+          class="space-y-4 text-[var(--onyx-text-secondary)] text-sm"
+        >
+          <li class="text-center py-6">No expenses available</li>
+        </ul>
+      </section>
+    </main>
+  </body>
 </html>
