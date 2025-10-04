@@ -136,6 +136,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     const labels = attendance.map((r) => r.month);
     const present = attendance.map((r) => parseInt(r.present || 0));
     const total = attendance.map((r) => parseInt(r.total || 0));
+    // const total = attendance.map(() =>  30);
+
     barChart(attendanceCanvas, labels, [
       {
         label: "Present",

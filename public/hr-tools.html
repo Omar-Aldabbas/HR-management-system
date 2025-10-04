@@ -15,7 +15,6 @@
     <script type="module" src="js/navigation.js" defer></script>
     <script type="module" src="js/hr-tools.js" defer></script>
   </head>
-
   <body class="bg-gray-50 text-gray-900 min-h-screen flex flex-col font-inter">
     <header
       class="relative w-full z-40 mt-16 bg-white/90 backdrop-blur-md border-b border-gray-200 shadow-sm transition-all duration-300"
@@ -67,6 +66,21 @@
             class="border border-gray-300 rounded-xl p-2 bg-gray-50 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-900 transition-all duration-200 w-full sm:w-auto"
           />
         </div>
+
+        <div class="flex gap-3">
+          <button
+            id="add-user-btn"
+            class="px-5 py-2 bg-blue-900 text-white font-medium rounded-xl hover:bg-blue-800 transition-all duration-200 shadow-sm"
+          >
+            <i class="fa-solid fa-user-plus mr-2"></i> Add User
+          </button>
+          <button
+            id="add-department-btn"
+            class="px-5 py-2 bg-green-700 text-white font-medium rounded-xl hover:bg-green-800 transition-all duration-200 shadow-sm"
+          >
+            <i class="fa-solid fa-building mr-2"></i> Add Department
+          </button>
+        </div>
       </section>
 
       <section
@@ -95,7 +109,6 @@
 
           <form id="edit-user-form" class="space-y-4">
             <input type="hidden" id="edit-user-id" />
-
             <div>
               <label
                 for="edit-user-name"
@@ -109,7 +122,6 @@
                 disabled
               />
             </div>
-
             <div>
               <label
                 for="edit-user-position"
@@ -122,7 +134,6 @@
                 class="w-full border border-gray-300 rounded-xl p-3 bg-gray-50 text-gray-900"
               />
             </div>
-
             <div>
               <label
                 for="edit-user-department"
@@ -142,7 +153,6 @@
                 <option value="Support">Support</option>
               </select>
             </div>
-
             <div class="flex justify-end gap-3 pt-2">
               <button
                 type="button"
@@ -161,6 +171,216 @@
           </form>
         </div>
       </section>
+
+      <section
+        id="add-user-modal"
+        class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50"
+      >
+        <div
+          class="bg-white rounded-2xl shadow-xl p-6 w-full max-w-md border border-gray-200"
+        >
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="text-xl font-semibold text-blue-900">Add New User</h2>
+            <button
+              id="close-add-modal"
+              class="text-gray-500 hover:text-red-500 transition-all duration-200"
+            >
+              <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+          </div>
+
+          <form id="add-user-form" class="space-y-4">
+            <div>
+              <label for="add-name" class="block text-gray-700 font-medium mb-1"
+                >Full Name</label
+              >
+              <input
+                type="text"
+                id="add-name"
+                required
+                class="w-full border border-gray-300 rounded-xl p-3 bg-gray-50 text-gray-900"
+              />
+            </div>
+            <div>
+              <label
+                for="add-email"
+                class="block text-gray-700 font-medium mb-1"
+                >Email</label
+              >
+              <input
+                type="email"
+                id="add-email"
+                required
+                class="w-full border border-gray-300 rounded-xl p-3 bg-gray-50 text-gray-900"
+              />
+            </div>
+            <div>
+              <label
+                for="add-password"
+                class="block text-gray-700 font-medium mb-1"
+                >Password</label
+              >
+              <input
+                type="password"
+                id="add-password"
+                required
+                class="w-full border border-gray-300 rounded-xl p-3 bg-gray-50 text-gray-900"
+              />
+            </div>
+            <div>
+              <label for="add-role" class="block text-gray-700 font-medium mb-1"
+                >Role</label
+              >
+              <select
+                id="add-role"
+                class="w-full border border-gray-300 rounded-xl p-3 bg-gray-50 text-gray-900"
+              >
+                <option value="employee">Employee</option>
+                <option value="manager">Manager</option>
+                <option value="hr">HR</option>
+                <option value="hr_manager">HR Manager</option>
+                <option value="admin">Admin</option>
+                <option value="sales">Sales</option>
+                <option value="team_lead">Team Lead</option>
+                <option value="intern">Intern</option>
+              </select>
+            </div>
+            <div>
+              <label
+                for="add-department"
+                class="block text-gray-700 font-medium mb-1"
+                >Department</label
+              >
+              <select
+                id="add-department"
+                class="w-full border border-gray-300 rounded-xl p-3 bg-gray-50 text-gray-900"
+              >
+                <option value="IT">IT</option>
+                <option value="HR">HR</option>
+                <option value="Sales">Sales</option>
+                <option value="Marketing">Marketing</option>
+                <option value="Finance">Finance</option>
+                <option value="Operations">Operations</option>
+                <option value="Support">Support</option>
+              </select>
+            </div>
+            <div class="flex justify-end gap-3 pt-2">
+              <button
+                type="button"
+                id="cancel-add"
+                class="px-5 py-2 bg-gray-200 rounded-xl hover:bg-gray-300 transition-all duration-200"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                class="px-5 py-2 bg-blue-900 text-white rounded-xl hover:bg-blue-800 transition-all duration-200"
+              >
+                Add
+              </button>
+            </div>
+          </form>
+        </div>
+      </section>
+
+      <section
+        id="add-department-modal"
+        class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50"
+      >
+        <div
+          class="bg-white rounded-2xl shadow-xl p-6 w-full max-w-md border border-gray-200"
+        >
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="text-xl font-semibold text-blue-900">
+              Add New Department
+            </h2>
+            <button
+              id="close-department-modal"
+              class="text-gray-500 hover:text-red-500 transition-all duration-200"
+            >
+              <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+          </div>
+
+          <form id="add-department-form" class="space-y-4">
+            <div>
+              <label
+                for="add-department-name"
+                class="block text-gray-700 font-medium mb-1"
+                >Department Name</label
+              >
+              <input
+                type="text"
+                id="add-department-name"
+                placeholder="e.g. Legal, R&D"
+                class="w-full border border-gray-300 rounded-xl p-3 bg-gray-50 text-gray-900"
+                required
+              />
+            </div>
+
+            <div>
+              <label
+                for="add-department-head"
+                class="block text-gray-700 font-medium mb-1"
+                >Department Head</label
+              >
+              <input
+                type="text"
+                id="add-department-head"
+                placeholder="Manager Name"
+                class="w-full border border-gray-300 rounded-xl p-3 bg-gray-50 text-gray-900"
+              />
+            </div>
+
+            <div class="flex justify-end gap-3 pt-2">
+              <button
+                type="button"
+                id="cancel-department"
+                class="px-5 py-2 bg-gray-200 rounded-xl hover:bg-gray-300 transition-all duration-200"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                id="save-department"
+                class="px-5 py-2 bg-green-700 text-white rounded-xl hover:bg-green-800 transition-all duration-200"
+              >
+                Add Department
+              </button>
+            </div>
+          </form>
+        </div>
+      </section>
+
+      <script>
+        const addBtn = document.getElementById("add-user-btn");
+        const addModal = document.getElementById("add-user-modal");
+        const closeAdd = document.getElementById("close-add-modal");
+        const cancelAdd = document.getElementById("cancel-add");
+        addBtn.addEventListener("click", () =>
+          addModal.classList.remove("hidden")
+        );
+        closeAdd.addEventListener("click", () =>
+          addModal.classList.add("hidden")
+        );
+        cancelAdd.addEventListener("click", () =>
+          addModal.classList.add("hidden")
+        );
+
+        const addDeptBtn = document.getElementById("add-department-btn");
+        const deptModal = document.getElementById("add-department-modal");
+        const closeDept = document.getElementById("close-department-modal");
+        const cancelDept = document.getElementById("cancel-department");
+        addDeptBtn.addEventListener("click", () =>
+          deptModal.classList.remove("hidden")
+        );
+        closeDept.addEventListener("click", () =>
+          deptModal.classList.add("hidden")
+        );
+        cancelDept.addEventListener("click", () =>
+          deptModal.classList.add("hidden")
+        );
+      </script>
     </main>
   </body>
 </html>

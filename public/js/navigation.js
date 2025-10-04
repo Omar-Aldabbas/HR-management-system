@@ -72,7 +72,6 @@ function desktopMenuHtml(itemsHtml) {
       </div>
       <div class="menu-list">
         ${itemsHtml}
-        <a href="history.html" class="menu-item"><i class="fa-solid fa-clock-rotate-left"></i>History</a>
       </div>
     </aside>
   `;
@@ -95,6 +94,8 @@ function buildItems(role) {
     base.push({ href: "manager-tools.html", icon: "fa-user-tie", label: "Manager Tools" });
   if (["hr", "hr_manager", "admin"].includes(role))
     base.push({ href: "hr-tools.html", icon: "fa-users-gear", label: "HR Tools" });
+  if (["hr", "hr_manager"].includes(role))
+    base.push({ href: "requests.html", icon: "fa-envelope-open-text", label: "Requests" });
   if (role === "sales")
     base.push({ href: "sales.html", icon: "fa-chart-pie", label: "Sales" });
   return base.map(i => `<a href="${i.href}" class="menu-item"><i class="fa-solid ${i.icon}"></i>${i.label}</a>`).join("");

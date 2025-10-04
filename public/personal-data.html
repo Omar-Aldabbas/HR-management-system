@@ -17,7 +17,7 @@
     class="bg-[var(--onyx-bg-base)] text-[var(--onyx-text-primary)] min-h-screen flex flex-col"
   >
     <header
-      class="nav-onyx sticky top-0 z-50 flex items-center justify-between px-4 sm:px-6 lg:px-8 py-4"
+      class="nav-onyx sticky top-0 z-50 flex items-center justify-between px-3 sm:px-6 lg:px-8 py-3"
     >
       <button
         onclick="window.history.back()"
@@ -26,25 +26,23 @@
         <i class="fa-solid fa-chevron-left text-lg"></i>
       </button>
       <h1
-        class="text-xl sm:text-2xl font-semibold tracking-tight text-center flex-1 uppercase"
+        class="text-lg sm:text-2xl font-semibold tracking-tight text-center flex-1 uppercase"
       >
         Personal Info
       </h1>
       <div class="w-6"></div>
     </header>
 
-    <main
-      class="flex-1 container-onyx py-10 px-4 sm:px-6 lg:px-10 space-y-12 fade-in"
-    >
+    <main class="flex-1  px-2 sm:px-4 py-4 space-y-6 fade-in">
       <section
-        class="card-onyx max-w-3xl mx-auto flex flex-col items-center text-center p-6 sm:p-8"
+        class="card-onyx w-full max-w-3xl mx-auto flex flex-col items-center text-center p-4 sm:p-6"
       >
-        <div class="relative mb-5">
+        <div class="relative mb-4">
           <img
             id="avatar-preview"
             src=""
             alt="User"
-            class="w-28 sm:w-32 h-28 sm:h-32 rounded-full border-4 border-[var(--onyx-border)] bg-[var(--onyx-bg-surface)] object-cover shadow-[0_0_25px_rgba(0,191,166,0.08)]"
+            class="w-24 sm:w-32 h-24 sm:h-32 rounded-full border-4 border-[var(--onyx-border)] bg-[var(--onyx-bg-surface)] object-cover shadow-[0_0_25px_rgba(0,191,166,0.08)]"
           />
           <div
             class="absolute bottom-1 right-1 bg-[var(--onyx-accent-1)] w-4 h-4 rounded-full border-2 border-[var(--onyx-bg-surface)]"
@@ -66,141 +64,131 @@
         </div>
       </section>
 
-      <section class="card-onyx max-w-5xl mx-auto p-6 sm:p-8">
-        <div class="flex items-center justify-between mb-6">
+      <section class="card-onyx w-full max-w-5xl mx-auto p-4 sm:p-6">
+        <div class="flex items-center justify-between mb-4">
           <h2 class="text-base sm:text-lg font-semibold">
             Personal Information
           </h2>
           <div
-            class="h-[2px] flex-1 ml-4 bg-gradient-to-r from-[var(--onyx-accent-1)] to-[var(--onyx-accent-2)] rounded-full"
+            class="h-[2px] flex-1 ml-3 bg-gradient-to-r from-[var(--onyx-accent-1)] to-[var(--onyx-accent-2)] rounded-full"
           ></div>
         </div>
 
-        <form id="personal-form" class="space-y-6">
+        <form id="personal-form" class="space-y-4">
           <div
-            class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"
+            class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4"
           >
             <div class="flex flex-col gap-1">
-              <label
-                class="text-sm text-[var(--onyx-text-secondary)] font-medium"
+              <label class="text-sm text-[var(--onyx-text-secondary)] font-medium"
                 >Full Name</label
               >
               <input
                 type="text"
                 id="full_name"
                 name="full_name"
-                class="input-onyx"
+                class="input-onyx w-full"
                 readonly
               />
             </div>
             <div class="flex flex-col gap-1">
-              <label
-                class="text-sm text-[var(--onyx-text-secondary)] font-medium"
+              <label class="text-sm text-[var(--onyx-text-secondary)] font-medium"
                 >Email</label
               >
               <input
                 type="email"
                 id="email"
                 name="email"
-                class="input-onyx"
+                class="input-onyx w-full"
                 readonly
               />
             </div>
             <div class="flex flex-col gap-1">
-              <label
-                class="text-sm text-[var(--onyx-text-secondary)] font-medium"
+              <label class="text-sm text-[var(--onyx-text-secondary)] font-medium"
                 >Phone</label
               >
               <input
                 type="text"
                 id="phone"
                 name="phone"
-                class="input-onyx"
+                class="input-onyx w-full"
                 readonly
               />
             </div>
             <div class="flex flex-col gap-1">
-              <label
-                class="text-sm text-[var(--onyx-text-secondary)] font-medium"
+              <label class="text-sm text-[var(--onyx-text-secondary)] font-medium"
                 >Address</label
               >
               <input
                 type="text"
                 id="address"
                 name="address"
-                class="input-onyx"
+                class="input-onyx w-full"
                 readonly
               />
             </div>
             <div class="flex flex-col gap-1">
-              <label
-                class="text-sm text-[var(--onyx-text-secondary)] font-medium"
+              <label class="text-sm text-[var(--onyx-text-secondary)] font-medium"
                 >City</label
               >
               <input
                 type="text"
                 id="city"
                 name="city"
-                class="input-onyx"
+                class="input-onyx w-full"
                 readonly
               />
             </div>
             <div class="flex flex-col gap-1">
-              <label
-                class="text-sm text-[var(--onyx-text-secondary)] font-medium"
+              <label class="text-sm text-[var(--onyx-text-secondary)] font-medium"
                 >State</label
               >
               <input
                 type="text"
                 id="state"
                 name="state"
-                class="input-onyx"
+                class="input-onyx w-full"
                 readonly
               />
             </div>
             <div class="flex flex-col gap-1">
-              <label
-                class="text-sm text-[var(--onyx-text-secondary)] font-medium"
+              <label class="text-sm text-[var(--onyx-text-secondary)] font-medium"
                 >Country</label
               >
               <input
                 type="text"
                 id="country"
                 name="country"
-                class="input-onyx"
+                class="input-onyx w-full"
                 readonly
               />
             </div>
             <div class="flex flex-col gap-1">
-              <label
-                class="text-sm text-[var(--onyx-text-secondary)] font-medium"
+              <label class="text-sm text-[var(--onyx-text-secondary)] font-medium"
                 >Postal Code</label
               >
               <input
                 type="text"
                 id="postal_code"
                 name="postal_code"
-                class="input-onyx"
+                class="input-onyx w-full"
                 readonly
               />
             </div>
             <div class="flex flex-col gap-1">
-              <label
-                class="text-sm text-[var(--onyx-text-secondary)] font-medium"
+              <label class="text-sm text-[var(--onyx-text-secondary)] font-medium"
                 >Department</label
               >
-              <p id="department" class="input-onyx-read">Loading...</p>
+              <p id="department" class="input-onyx-read w-full">Loading...</p>
             </div>
             <div class="flex flex-col gap-1">
-              <label
-                class="text-sm text-[var(--onyx-text-secondary)] font-medium"
+              <label class="text-sm text-[var(--onyx-text-secondary)] font-medium"
                 >Position</label
               >
-              <p id="position" class="input-onyx-read">Loading...</p>
+              <p id="position" class="input-onyx-read w-full">Loading...</p>
             </div>
           </div>
 
-          <div class="flex flex-col sm:flex-row gap-3 mt-6">
+          <div class="flex flex-col sm:flex-row gap-3 mt-4">
             <button
               type="button"
               id="edit-btn"

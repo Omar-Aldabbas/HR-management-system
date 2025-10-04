@@ -11,12 +11,19 @@ const editPosition = document.getElementById("edit-user-position");
 const editDepartment = document.getElementById("edit-user-department");
 const closeModalBtn = document.getElementById("close-edit-modal");
 const cancelEdit = document.getElementById("cancel-edit");
+const addUserBtn = document.getElementById("add-user-btn");
+const addModal = document.getElementById("add-user-modal");
+const addForm = document.getElementById("add-user-form");
+const closeAddModalBtn = document.getElementById("close-add-modal");
+const cancelAdd = document.getElementById("cancel-add");
 
 let usersData = [];
 
 async function loadUsers() {
   container.innerHTML = `<p class="text-gray-500 col-span-full text-center">Loading users...</p>`;
-  const res = await safeFetch("hr_manager_tool.php", "POST", { action: "list-users" });
+  const res = await safeFetch("hr_manager_tool.php", "POST", {
+    action: "list-users",
+  });
   if (!res.success || !res.users) {
     container.innerHTML = `<p class="text-red-500 col-span-full text-center">Failed to load users</p>`;
     return;
@@ -26,9 +33,8 @@ async function loadUsers() {
 }
 
 function avatarUrl(user) {
-  if (user?.avatar && user.avatar.trim() !== "") {
+  if (user?.avatar && user.avatar.trim() !== "")
     return `http://localhost/HR-project/${user.avatar.replace(/^\/+/, "")}`;
-  }
   return "http://localhost/HR-project/uploads/avatars/default.png";
 }
 
@@ -36,34 +42,27 @@ function createCard(user) {
   const card = document.createElement("article");
   card.className =
     "bg-white/90 backdrop-blur-sm border border-gray-200 rounded-2xl shadow-sm hover:shadow-md transition-all duration-300 p-5 flex flex-row items-center gap-5 w-full";
-
   const img = document.createElement("img");
   img.src = avatarUrl(user);
   img.alt = user.name || "Avatar";
   img.className =
     "w-20 h-20 rounded-full object-cover border-2 border-gray-200 flex-shrink-0";
-
   const infoWrap = document.createElement("div");
   infoWrap.className = "flex-1 min-w-0 flex flex-col justify-center gap-1";
-
   const head = document.createElement("div");
   head.className = "flex justify-between items-start w-full gap-2 flex-wrap";
-
   const nameCol = document.createElement("div");
   const nameEl = document.createElement("h3");
-  nameEl.className = "text-lg font-semibold text-blue-900 leading-tight break-words";
+  nameEl.className =
+    "text-lg font-semibold text-blue-900 leading-tight break-words";
   nameEl.textContent = user.name || "No name";
-
   const posEl = document.createElement("p");
   posEl.className = "text-sm text-gray-600 mt-0.5 break-words";
   posEl.textContent = user.position || "-";
-
   nameCol.appendChild(nameEl);
   nameCol.appendChild(posEl);
-
   const badgeGroup = document.createElement("div");
   badgeGroup.className = "flex gap-2 flex-wrap items-center";
-
   if (["manager", "team_lead"].includes((user.role || "").toLowerCase())) {
     const roleBadge = document.createElement("div");
     roleBadge.className =
@@ -71,27 +70,27 @@ function createCard(user) {
     roleBadge.textContent = "Manager";
     badgeGroup.appendChild(roleBadge);
   }
-
   const editBtn = document.createElement("button");
   editBtn.className =
     "ml-2 px-4 py-1.5 bg-yellow-100 text-yellow-800 text-sm font-medium rounded-xl hover:bg-yellow-200 transition-all duration-200";
   editBtn.textContent = "Edit";
   editBtn.addEventListener("click", () => openEditModal(user));
-
+  const deleteBtn = document.createElement("button");
+  deleteBtn.className =
+    "ml-2 px-4 py-1.5 bg-red-100 text-red-800 text-sm font-medium rounded-xl hover:bg-red-200 transition-all duration-200";
+  deleteBtn.textContent = "Delete";
+  deleteBtn.addEventListener("click", () => deleteUser(user.id));
   head.appendChild(nameCol);
   head.appendChild(badgeGroup);
   head.appendChild(editBtn);
-
+  head.appendChild(deleteBtn);
   const status = document.createElement("p");
   status.className = "mt-2 text-sm font-medium text-green-700";
   status.textContent = "Available";
-
   infoWrap.appendChild(head);
   infoWrap.appendChild(status);
-
   card.appendChild(img);
   card.appendChild(infoWrap);
-
   return card;
 }
 
@@ -101,16 +100,15 @@ function renderUsers() {
     const depFilter = departmentFilter.value.trim().toLowerCase();
     const search = searchInput.value.trim().toLowerCase();
     return (
-      (!depFilter || (user.department || "").toLowerCase().includes(depFilter)) &&
+      (!depFilter ||
+        (user.department || "").toLowerCase().includes(depFilter)) &&
       (!search || (user.name || "").toLowerCase().includes(search))
     );
   });
-
   if (filtered.length === 0) {
     container.innerHTML = `<p class="text-gray-500 col-span-full text-center">No users found</p>`;
     return;
   }
-
   filtered.forEach((user) => container.appendChild(createCard(user)));
 }
 
@@ -126,6 +124,24 @@ function closeEditModal() {
   editModal.classList.add("hidden");
 }
 
+function openAddModal() {
+  addModal.classList.remove("hidden");
+}
+
+function closeAddModal() {
+  addModal.classList.add("hidden");
+}
+
+async function deleteUser(id) {
+  if (!confirm("Are you sure you want to delete this user?")) return;
+  const res = await safeFetch("hr_manager_tool.php", "POST", {
+    action: "delete-user",
+    id,
+  });
+  if (res.success) await loadUsers();
+  else alert(res.message || "Failed to delete user");
+}
+
 editForm.addEventListener("submit", async (e) => {
   e.preventDefault();
   const payload = {
@@ -138,14 +154,27 @@ editForm.addEventListener("submit", async (e) => {
   if (res.success) {
     await loadUsers();
     closeEditModal();
-  } else {
-    alert(res.message || "Failed to update user");
-  }
+  } else alert(res.message || "Failed to update user");
 });
 
+addForm.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const formData = new FormData(addForm);
+  const payload = Object.fromEntries(formData.entries());
+  payload.action = "add-user";
+  const res = await safeFetch("hr_manager_tool.php", "POST", payload);
+  if (res.success) {
+    await loadUsers();
+    closeAddModal();
+    addForm.reset();
+  } else alert(res.message || "Failed to add user");
+});
+
+if (addUserBtn) addUserBtn.addEventListener("click", openAddModal);
+if (closeAddModalBtn) closeAddModalBtn.addEventListener("click", closeAddModal);
+if (cancelAdd) cancelAdd.addEventListener("click", closeAddModal);
 closeModalBtn.addEventListener("click", closeEditModal);
 if (cancelEdit) cancelEdit.addEventListener("click", closeEditModal);
 departmentFilter.addEventListener("change", renderUsers);
 searchInput.addEventListener("input", renderUsers);
-
 document.addEventListener("DOMContentLoaded", loadUsers);

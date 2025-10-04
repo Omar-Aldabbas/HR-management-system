@@ -40,11 +40,11 @@ $userDept = strtolower($currentUser['department']);
 switch($action) {
 
     case 'list':
-        if ($userRole === 'admin' || ($userRole === 'manager' && $userDept === 'hr')) {
+        if (in_array($userRole, ['admin', 'hr']) || ($userRole === 'manager' && $userDept === 'hr')) {
             $stmt = $mysqli->prepare("
                 SELECT p.*, u.name, u.department, u.role,
-                       IFNULL(SUM(e.amount),0) AS approved_expenses,
-                       a.name AS approved_by_name
+                    IFNULL(SUM(e.amount),0) AS approved_expenses,
+                    a.name AS approved_by_name
                 FROM payrolls p
                 JOIN users u ON u.id=p.user_id
                 LEFT JOIN users a ON a.id=p.approved_by
@@ -52,22 +52,11 @@ switch($action) {
                 GROUP BY p.id
                 ORDER BY p.year DESC, p.month DESC
             ");
-        } elseif ($userRole === 'hr' && $userDept === 'hr') {
-            $stmt = $mysqli->prepare("
-                SELECT p.*, u.name, u.department, u.role,
-                       IFNULL(SUM(e.amount),0) AS approved_expenses,
-                       a.name AS approved_by_name
-                FROM payrolls p
-                JOIN users u ON u.id=p.user_id
-                LEFT JOIN users a ON a.id=p.approved_by
-                LEFT JOIN expenses e ON e.user_id=u.id AND e.status='approved'
-                ORDER BY p.year DESC, p.month DESC
-            ");
         } else {
             $stmt = $mysqli->prepare("
                 SELECT p.*, u.name, u.department, u.role,
-                       IFNULL(SUM(e.amount),0) AS approved_expenses,
-                       a.name AS approved_by_name
+                    IFNULL(SUM(e.amount),0) AS approved_expenses,
+                    a.name AS approved_by_name
                 FROM payrolls p
                 JOIN users u ON u.id=p.user_id
                 LEFT JOIN users a ON a.id=p.approved_by
@@ -76,13 +65,13 @@ switch($action) {
                 GROUP BY p.id
                 ORDER BY p.year DESC, p.month DESC
             ");
-            $stmt->bind_param("i", $userId);
+            $stmt->bind_param('i', $userId);
         }
 
         $stmt->execute();
         $res = $stmt->get_result();
         $payrolls = [];
-        while($row = $res->fetch_assoc()) {
+        while ($row = $res->fetch_assoc()) {
             $row['net_salary'] = $row['base_salary'] + $row['additions'] + $row['approved_expenses'] - $row['deductions'] - $row['taxes'];
             $payrolls[] = $row;
         }

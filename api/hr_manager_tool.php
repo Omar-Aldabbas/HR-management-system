@@ -41,13 +41,13 @@ switch ($action) {
     case 'list-users':
         $role = strtolower($currentUser['role']);
         if ($role === 'hr' || $role === 'hr_manager') {
-            $stmt = $mysqli->prepare("SELECT id, name, email, role, position, department FROM users");
+            $stmt = $mysqli->prepare("SELECT id, employee_id, name, email, role, position, department FROM users");
         } elseif ($role === 'manager') {
             $dept = $currentUser['department'];
-            $stmt = $mysqli->prepare("SELECT id, name, email, role, position, department FROM users WHERE department=?");
+            $stmt = $mysqli->prepare("SELECT id, employee_id, name, email, role, position, department FROM users WHERE department=?");
             $stmt->bind_param("s", $dept);
         } else {
-            $stmt = $mysqli->prepare("SELECT id, name, email, role, position, department FROM users WHERE id=?");
+            $stmt = $mysqli->prepare("SELECT id, employee_id, name, email, role, position, department FROM users WHERE id=?");
             $stmt->bind_param("i", $currentUser['id']);
         }
         $stmt->execute();
@@ -139,6 +139,65 @@ switch ($action) {
         $stmt->execute();
         $stmt->close();
         echo json_encode(['success'=>true, 'message'=>'Meeting scheduled successfully']);
+        exit;
+
+    case 'add-user':
+        if (!in_array($currentUser['role'], ['hr', 'hr_manager'])) {
+            echo json_encode(['success' => false, 'message' => 'Unauthorized']);
+            exit;
+        }
+
+        $employeeId = trim($input['employee_id'] ?? '');
+        $name = trim($input['name'] ?? '');
+        $email = trim($input['email'] ?? '');
+        $password = password_hash($input['password'] ?? '', PASSWORD_BCRYPT);
+        $role = trim($input['role'] ?? 'employee');
+        $position = trim($input['position'] ?? '');
+        $department = trim($input['department'] ?? 'Unassigned');
+        $gender = trim($input['gender'] ?? 'Unassigned');
+
+        if (!$employeeId || !$name || !$email || empty($input['password'])) {
+            echo json_encode(['success' => false, 'message' => 'Missing required fields']);
+            exit;
+        }
+
+        $stmt = $mysqli->prepare("INSERT INTO users (employee_id, name, email, password, role, position, department, gender) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+        $stmt->bind_param("ssssssss", $employeeId, $name, $email, $password, $role, $position, $department, $gender);
+        $ok = $stmt->execute();
+        $stmt->close();
+
+        echo json_encode([
+            'success' => $ok,
+            'message' => $ok ? 'User added successfully' : 'Failed to add user'
+        ]);
+        exit;
+
+    case 'delete-user':
+        if (!in_array($currentUser['role'], ['hr', 'hr_manager'])) {
+            echo json_encode(['success' => false, 'message' => 'Unauthorized']);
+            exit;
+        }
+
+        $userId = intval($input['id'] ?? 0);
+        if (!$userId) {
+            echo json_encode(['success' => false, 'message' => 'Missing user ID']);
+            exit;
+        }
+
+        if ($userId === intval($currentUser['id'])) {
+            echo json_encode(['success' => false, 'message' => 'You cannot delete your own account']);
+            exit;
+        }
+
+        $stmt = $mysqli->prepare("DELETE FROM users WHERE id=?");
+        $stmt->bind_param("i", $userId);
+        $ok = $stmt->execute();
+        $stmt->close();
+
+        echo json_encode([
+            'success' => $ok,
+            'message' => $ok ? 'User deleted successfully' : 'Failed to delete user'
+        ]);
         exit;
 
     default:

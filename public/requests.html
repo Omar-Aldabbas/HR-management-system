@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Requests</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
+    <link rel="stylesheet" href="css/custom.css" />
+    <script type="module" src="js/navigation.js" defer></script>
+    <script type="module" src="js/requests.js" defer></script>
+  </head>
+  <body class="bg-gray-50 text-gray-900 min-h-screen flex flex-col font-inter">
+    <header
+      class="relative w-full z-40 mt-16 bg-white/90 backdrop-blur-md border-b border-gray-200 shadow-sm transition-all duration-300"
+    >
+      <div
+        class="max-w-6xl mx-auto flex items-center justify-center px-6 py-5 text-center"
+      >
+        <h1 class="text-2xl font-semibold text-blue-900 tracking-wide">
+          Requests
+        </h1>
+      </div>
+    </header>
+
+    <main class="flex-1 container mx-auto px-4 sm:px-6 lg:px-8 pt-10 pb-16">
+      <section
+        class="mb-8 flex flex-col xl:flex-row xl:items-center xl:justify-between gap-6 bg-white/90 backdrop-blur-sm border border-gray-200 rounded-2xl shadow-sm p-6"
+      >
+        <div class="flex flex-wrap gap-3 justify-center sm:justify-start">
+          <button
+            id="show-leaves"
+            class="px-5 py-2 bg-blue-900 text-white font-medium rounded-xl hover:bg-blue-800 transition-all duration-200 shadow-sm"
+          >
+            <i class="fa-solid fa-leaf mr-2"></i>Leaves
+          </button>
+          <button
+            id="show-expenses"
+            class="px-5 py-2 bg-green-700 text-white font-medium rounded-xl hover:bg-green-800 transition-all duration-200 shadow-sm"
+          >
+            <i class="fa-solid fa-receipt mr-2"></i>Expenses
+          </button>
+        </div>
+
+        <div
+          class="grid grid-cols-1 sm:grid-cols-3 gap-4 w-full xl:w-auto items-end"
+        >
+          <div class="flex flex-col">
+            <label for="department-filter" class="text-gray-700 font-medium"
+              >Department</label
+            >
+            <select
+              id="department-filter"
+              class="border border-gray-300 rounded-xl p-2 bg-gray-50 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-900 transition-all duration-200"
+            >
+              <option value="">All</option>
+              <option value="IT">IT</option>
+              <option value="HR">HR</option>
+              <option value="Sales">Sales</option>
+              <option value="Marketing">Marketing</option>
+              <option value="Finance">Finance</option>
+              <option value="Operations">Operations</option>
+              <option value="Support">Support</option>
+            </select>
+          </div>
+
+          <div class="flex flex-col">
+            <label for="search-name" class="text-gray-700 font-medium"
+              >Search by Name</label
+            >
+            <input
+              id="search-name"
+              type="text"
+              placeholder="Employee Name"
+              class="border border-gray-300 rounded-xl p-2 bg-gray-50 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-900 transition-all duration-200"
+            />
+          </div>
+
+          <div class="flex flex-col">
+            <label for="status-filter" class="text-gray-700 font-medium"
+              >Status</label
+            >
+            <select
+              id="status-filter"
+              class="border border-gray-300 rounded-xl p-2 bg-gray-50 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-900 transition-all duration-200"
+            >
+              <option value="">All</option>
+              <option value="pending">Pending</option>
+              <option value="approved">Approved</option>
+              <option value="rejected">Rejected</option>
+            </select>
+          </div>
+        </div>
+      </section>
+
+      <section
+        id="request-container"
+        class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
+      >
+        <p class="text-gray-500 col-span-full text-center">
+          Loading requests...
+        </p>
+      </section>
+    </main>
+  </body>
+</html>
