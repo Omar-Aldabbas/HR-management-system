@@ -5,6 +5,8 @@ It combines a structured **PHP–MySQL backend** with a clean, modular **HTML//T
 This project aims to centralize HR operations and provide managers, HR staff, and employees with efficient, accessible tools for daily workflows.
 
 ---
+note : there is hierarchy in permissions and what u can do  hr can't access their self or their colleagues hr manager is the highest hierarchy with admin , managers in the other hand has thetpermissions of alert and assign meetings,tasks and targets for their employees.
+---
 
 ## Table of Contents
 - [Overview](#overview)
