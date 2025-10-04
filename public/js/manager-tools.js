@@ -33,10 +33,10 @@ const btnMeeting = document.getElementById("btn-add-meeting");
 let usersData = [];
 
 async function loadUsers() {
-  container.innerHTML = `<p class="text-gray-500 col-span-full">Loading users...</p>`;
+  container.innerHTML = `<p class="center text-secondary p-4">Loading users...</p>`;
   const res = await safeFetch("hr_manager_tool.php", "POST", { action: "list-users" });
   if (!res.success || !res.users) {
-    container.innerHTML = `<p class="text-red-500 col-span-full">Failed to load users</p>`;
+    container.innerHTML = `<p class="center text-secondary p-4">Failed to load users</p>`;
     return;
   }
   usersData = res.users;
@@ -65,28 +65,30 @@ function avatarUrl(user) {
 
 function createCard(user) {
   const card = document.createElement("article");
-  card.className = "bg-white rounded-lg shadow p-4 flex flex-row items-center gap-4 w-full";
+  card.className = "card-onyx flex items-center gap-4 w-full transition-all duration-200";
 
   const img = document.createElement("img");
   img.src = avatarUrl(user);
   img.alt = user.name || "Avatar";
-  img.className = "w-20 h-20 rounded-full object-cover border-2 border-gray-200 flex-shrink-0";
+  img.className = "w-16 h-16 sm:w-20 sm:h-20 rounded-full object-cover border";
+  img.style.borderColor = "var(--onyx-border)";
 
   const infoWrap = document.createElement("div");
   infoWrap.className = "flex-1 min-w-0 flex flex-col justify-center gap-1";
 
   const head = document.createElement("div");
-  head.className = "flex justify-between items-center w-full";
+  head.className = "flex justify-between items-start w-full flex-wrap gap-1";
 
   const textCol = document.createElement("div");
-  textCol.className = "overflow-visible";
+  textCol.className = "overflow-hidden";
 
   const nameEl = document.createElement("h3");
-  nameEl.className = "text-lg font-semibold text-gray-900 leading-tight break-words";
+  nameEl.className = "text-lg font-semibold";
+  nameEl.style.color = "var(--onyx-text-primary)";
   nameEl.textContent = user.name || "No name";
 
   const posEl = document.createElement("p");
-  posEl.className = "text-sm text-gray-600 mt-1 break-words";
+  posEl.className = "small text-secondary mt-1";
   posEl.textContent = user.position || "-";
 
   textCol.appendChild(nameEl);
@@ -97,7 +99,10 @@ function createCard(user) {
 
   if (["manager", "team_lead"].includes((user.role || "").toLowerCase())) {
     const roleBadge = document.createElement("div");
-    roleBadge.className = "px-3 py-1 text-xs font-bold bg-blue-100 text-blue-700 rounded whitespace-nowrap";
+    roleBadge.className = "small px-3 py-1 rounded-sm";
+    roleBadge.style.background = "var(--onyx-hover-glow)";
+    roleBadge.style.color = "var(--onyx-accent-1)";
+    roleBadge.style.fontWeight = "600";
     roleBadge.textContent = "Manager";
     badgeWrap.appendChild(roleBadge);
   }
@@ -106,7 +111,10 @@ function createCard(user) {
   head.appendChild(badgeWrap);
 
   const status = document.createElement("p");
-  status.className = "mt-1 text-sm font-medium text-green-700";
+  status.className = "small mt-2 px-2 py-1 rounded-sm";
+  status.style.background = "var(--onyx-hover-glow)";
+  status.style.color = "var(--onyx-accent-1)";
+  status.style.fontWeight = "600";
   status.textContent = "Available";
 
   infoWrap.appendChild(head);
@@ -123,18 +131,18 @@ function renderUsers() {
   const filtered = usersData.filter(user => {
     const depFilter = departmentFilter.value.trim().toLowerCase();
     const search = searchInput.value.trim().toLowerCase();
-    return (!depFilter || (user.department || "").toLowerCase().includes(depFilter)) &&
-           (!search || (user.name || "").toLowerCase().includes(search));
+    return (
+      (!depFilter || (user.department || "").toLowerCase().includes(depFilter)) &&
+      (!search || (user.name || "").toLowerCase().includes(search))
+    );
   });
 
   if (filtered.length === 0) {
-    container.innerHTML = `<p class="text-gray-500 col-span-full">No users found</p>`;
+    container.innerHTML = `<p class="center text-secondary p-4">No users found</p>`;
     return;
   }
 
-  filtered.forEach(user => {
-    container.appendChild(createCard(user));
-  });
+  filtered.forEach(user => container.appendChild(createCard(user)));
 }
 
 departmentFilter.addEventListener("change", renderUsers);
@@ -145,6 +153,10 @@ function hideAllForms() {
   targetForm.classList.add("hidden");
   meetingForm.classList.add("hidden");
 }
+
+btnTask.className = "btn-onyx-primary";
+btnTarget.className = "btn-onyx-primary";
+btnMeeting.className = "btn-onyx-primary";
 
 btnTask.addEventListener("click", () => {
   hideAllForms();
@@ -194,7 +206,7 @@ targetForm.addEventListener("submit", async e => {
 meetingForm.addEventListener("submit", async e => {
   e.preventDefault();
   const selectedParticipants = Array.from(meetingParticipants.selectedOptions).map(o => parseInt(o.value));
-  selectedParticipants.forEach(async participantId => {
+  for (const participantId of selectedParticipants) {
     const payload = {
       action: "schedule-meeting",
       employee_id: participantId,
@@ -203,7 +215,7 @@ meetingForm.addEventListener("submit", async e => {
     };
     const res = await safeFetch("hr_manager_tool.php", "POST", payload);
     if (!res.success) alert(`Error: ${res.message}`);
-  });
+  }
   alert("Meeting scheduled successfully for selected participants");
   meetingForm.reset();
   hideAllForms();

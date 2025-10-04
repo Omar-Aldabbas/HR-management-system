@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Company Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="css/custom.css" />
+    <script type="module" src="js/companyDashboard.js" defer></script>
+
+  </head>
+  <body class="bg-gray-100 min-h-screen flex flex-col text-gray-800">
+    <header class="bg-blue-900 text-white shadow-md py-4 px-6 flex items-center gap-3">
+      <button id="backBtn" class="text-white hover:text-blue-200 transition">
+        <i class="fa-solid fa-chevron-left text-lg"></i>
+      </button>
+      <h1 class="text-2xl font-semibold tracking-tight">Company Dashboard</h1>
+    </header>
+
+    <main class="flex-1 container mx-auto p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <section class="bg-white p-5 rounded-lg shadow-sm border border-gray-200">
+        <h2 class="text-lg font-semibold mb-3 flex items-center gap-2">
+          <i class="fa-solid fa-calendar-check text-blue-600"></i>
+          <span>Attendance by Department</span>
+        </h2>
+        <canvas id="attendanceChart" class="w-full h-56"></canvas>
+      </section>
+
+      <section class="bg-white p-5 rounded-lg shadow-sm border border-gray-200">
+        <h2 class="text-lg font-semibold mb-3 flex items-center gap-2">
+          <i class="fa-solid fa-users text-green-600"></i>
+          <span>Employee Distribution</span>
+        </h2>
+        <canvas id="employeeChart" class="w-full h-56"></canvas>
+      </section>
+
+      <section class="bg-white p-5 rounded-lg shadow-sm border border-gray-200">
+        <h2 class="text-lg font-semibold mb-3 flex items-center gap-2">
+          <i class="fa-solid fa-clipboard-list text-yellow-600"></i>
+          <span>Task Summary</span>
+        </h2>
+        <canvas id="taskChart" class="w-full h-56"></canvas>
+      </section>
+
+      <section class="bg-white p-5 rounded-lg shadow-sm border border-gray-200">
+        <h2 class="text-lg font-semibold mb-3 flex items-center gap-2">
+          <i class="fa-solid fa-leaf text-emerald-600"></i>
+          <span>Leave Usage</span>
+        </h2>
+        <canvas id="leaveChart" class="w-full h-56"></canvas>
+      </section>
+
+      <section class="bg-white p-5 rounded-lg shadow-sm border border-gray-200">
+        <h2 class="text-lg font-semibold mb-3 flex items-center gap-2">
+          <i class="fa-solid fa-chart-line text-purple-600"></i>
+          <span>Productivity by Department</span>
+        </h2>
+        <canvas id="productivityChart" class="w-full h-56"></canvas>
+      </section>
+
+      <section class="bg-white p-5 rounded-lg shadow-sm border border-gray-200">
+        <h2 class="text-lg font-semibold mb-3 flex items-center gap-2">
+          <i class="fa-solid fa-venus-mars text-pink-600"></i>
+          <span>Gender Distribution</span>
+        </h2>
+        <canvas id="genderChart" class="w-full h-56"></canvas>
+      </section>
+
+      <section class="bg-white p-5 rounded-lg shadow-sm border border-gray-200 md:col-span-2 lg:col-span-3">
+        <h2 class="text-lg font-semibold mb-3 flex items-center gap-2">
+          <i class="fa-solid fa-user-plus text-indigo-600"></i>
+          <span>New Hires (Last 12 Months)</span>
+        </h2>
+        <canvas id="hiresChart" class="w-full h-64"></canvas>
+      </section>
+    </main>
+  </body>
+</html>

@@ -1,104 +1,230 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Personal Info</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
-  <link rel="stylesheet" href="css/custom.css" />
-  <script type="module" src="./js/personal-data.js" defer></script>
-</head>
-<body class="bg-gray-100 text-gray-900 min-h-screen flex flex-col">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Personal Info</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"
+    />
+    <link rel="stylesheet" href="css/custom.css" />
+    <script type="module" src="./js/personal-data.js" defer></script>
+  </head>
 
-  <header class="sticky top-0 left-0 z-10 flex items-center bg-blue-900 text-white shadow-lg px-4 py-3">
-    <button onclick="window.history.back()" class="text-white hover:text-gray-300 transition">
-      <i class="fa-solid fa-chevron-left text-lg"></i>
-    </button>
-    <h1 class="flex-1 text-center text-2xl font-bold tracking-widest">PERSONAL INFO</h1>
-    <div class="w-6"></div>
-  </header>
+  <body
+    class="bg-[var(--onyx-bg-base)] text-[var(--onyx-text-primary)] min-h-screen flex flex-col"
+  >
+    <header
+      class="nav-onyx sticky top-0 z-50 flex items-center justify-between px-4 sm:px-6 lg:px-8 py-4"
+    >
+      <button
+        onclick="window.history.back()"
+        class="text-[var(--onyx-text-secondary)] hover:text-[var(--onyx-accent-1)] transition"
+      >
+        <i class="fa-solid fa-chevron-left text-lg"></i>
+      </button>
+      <h1
+        class="text-xl sm:text-2xl font-semibold tracking-tight text-center flex-1 uppercase"
+      >
+        Personal Info
+      </h1>
+      <div class="w-6"></div>
+    </header>
 
-  <main class="flex-1 container mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+    <main
+      class="flex-1 container-onyx py-10 px-4 sm:px-6 lg:px-10 space-y-12 fade-in"
+    >
+      <section
+        class="card-onyx max-w-3xl mx-auto flex flex-col items-center text-center p-6 sm:p-8"
+      >
+        <div class="relative mb-5">
+          <img
+            id="avatar-preview"
+            src=""
+            alt="User"
+            class="w-28 sm:w-32 h-28 sm:h-32 rounded-full border-4 border-[var(--onyx-border)] bg-[var(--onyx-bg-surface)] object-cover shadow-[0_0_25px_rgba(0,191,166,0.08)]"
+          />
+          <div
+            class="absolute bottom-1 right-1 bg-[var(--onyx-accent-1)] w-4 h-4 rounded-full border-2 border-[var(--onyx-bg-surface)]"
+          ></div>
+          <label
+            for="avatar"
+            id="change-avatar-btn"
+            class="absolute bottom-0 left-1 bg-[var(--onyx-accent-1)] hover:bg-[var(--onyx-accent-2)] text-white w-8 h-8 rounded-full flex items-center justify-center cursor-pointer shadow-lg transition hidden"
+          >
+            <i class="fa-solid fa-camera"></i>
+          </label>
+          <input
+            type="file"
+            id="avatar"
+            name="avatar"
+            accept="image/*"
+            class="hidden"
+          />
+        </div>
+      </section>
 
-    <section class="bg-white p-6 rounded-lg shadow-lg max-w-4xl mx-auto text-center relative">
-      <div class="relative inline-block">
-        <img id="avatar-preview" src="" alt="User" class="w-28 h-28 rounded-full border-4 border-gray-200 shadow-lg object-cover">
-        <div class="absolute -bottom-1 right-0 bg-green-500 w-4 h-4 rounded-full border-2 border-white"></div>
-        <label for="avatar" id="change-avatar-btn" class="absolute bottom-0 left-1 bg-blue-500 hover:bg-blue-600 text-white w-8 h-8 rounded-full flex items-center justify-center cursor-pointer shadow-lg transition hidden">
-          <i class="fa-solid fa-camera"></i>
-        </label>
-        <input type="file" id="avatar" name="avatar" accept="image/*" class="hidden">
-      </div>
-    </section>
-
-    <section class="bg-white p-6 rounded-lg shadow-lg max-w-4xl mx-auto">
-      <h2 class="text-lg font-semibold mb-4">Personal Information</h2>
-      <form id="personal-form" class="space-y-4">
-
-        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-          <div class="flex flex-col">
-            <label class="text-sm text-gray-500 font-medium">Full Name</label>
-            <input type="text" id="full_name" name="full_name" class="border rounded-md px-3 py-2 bg-gray-50 focus:ring-2 focus:ring-blue-400 focus:outline-none" readonly>
-          </div>
-          <div class="flex flex-col">
-            <label class="text-sm text-gray-500 font-medium">Email</label>
-            <input type="email" id="email" name="email" class="border rounded-md px-3 py-2 bg-gray-50 focus:ring-2 focus:ring-blue-400 focus:outline-none" readonly>
-          </div>
-          <div class="flex flex-col">
-            <label class="text-sm text-gray-500 font-medium">Phone</label>
-            <input type="text" id="phone" name="phone" class="border rounded-md px-3 py-2 bg-gray-50 focus:ring-2 focus:ring-blue-400 focus:outline-none" readonly>
-          </div>
-          <div class="flex flex-col">
-            <label class="text-sm text-gray-500 font-medium">Address</label>
-            <input type="text" id="address" name="address" class="border rounded-md px-3 py-2 bg-gray-50 focus:ring-2 focus:ring-blue-400 focus:outline-none" readonly>
-          </div>
-          <div class="flex flex-col">
-            <label class="text-sm text-gray-500 font-medium">City</label>
-            <input type="text" id="city" name="city" class="border rounded-md px-3 py-2 bg-gray-50 focus:ring-2 focus:ring-blue-400 focus:outline-none" readonly>
-          </div>
-          <div class="flex flex-col">
-            <label class="text-sm text-gray-500 font-medium">State</label>
-            <input type="text" id="state" name="state" class="border rounded-md px-3 py-2 bg-gray-50 focus:ring-2 focus:ring-blue-400 focus:outline-none" readonly>
-          </div>
-          <div class="flex flex-col">
-            <label class="text-sm text-gray-500 font-medium">Country</label>
-            <input type="text" id="country" name="country" class="border rounded-md px-3 py-2 bg-gray-50 focus:ring-2 focus:ring-blue-400 focus:outline-none" readonly>
-          </div>
-          <div class="flex flex-col">
-            <label class="text-sm text-gray-500 font-medium">Postal Code</label>
-            <input type="text" id="postal_code" name="postal_code" class="border rounded-md px-3 py-2 bg-gray-50 focus:ring-2 focus:ring-blue-400 focus:outline-none" readonly>
-          </div>
-          <div class="flex flex-col">
-            <label class="text-sm text-gray-500 font-medium">Department</label>
-            <p id="department" class="border rounded-md px-3 py-2 bg-gray-100 text-gray-700">
-            </p>
-          </div>
-
-          <div class="flex flex-col">
-            <label class="text-sm text-gray-500 font-medium">Position</label>
-            <p id="position" class="border rounded-md px-3 py-2 bg-gray-100 text-gray-700">
-            </p>
-          </div>
-
+      <section class="card-onyx max-w-5xl mx-auto p-6 sm:p-8">
+        <div class="flex items-center justify-between mb-6">
+          <h2 class="text-base sm:text-lg font-semibold">
+            Personal Information
+          </h2>
+          <div
+            class="h-[2px] flex-1 ml-4 bg-gradient-to-r from-[var(--onyx-accent-1)] to-[var(--onyx-accent-2)] rounded-full"
+          ></div>
         </div>
 
-        <div class="flex flex-col sm:flex-row gap-2 mt-4">
-          <button type="button" id="edit-btn" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg font-semibold shadow transition">
-            Edit Info
-          </button>
-          <button type="button" id="cancel-btn" class="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-900 py-2 rounded-lg font-semibold shadow hidden transition">
-            Cancel
-          </button>
-          <button type="button" id="save-btn" class="flex-1 bg-green-500 hover:bg-green-600 text-white py-2 rounded-lg font-semibold shadow hidden transition">
-            Save
-          </button>
-        </div>
+        <form id="personal-form" class="space-y-6">
+          <div
+            class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"
+          >
+            <div class="flex flex-col gap-1">
+              <label
+                class="text-sm text-[var(--onyx-text-secondary)] font-medium"
+                >Full Name</label
+              >
+              <input
+                type="text"
+                id="full_name"
+                name="full_name"
+                class="input-onyx"
+                readonly
+              />
+            </div>
+            <div class="flex flex-col gap-1">
+              <label
+                class="text-sm text-[var(--onyx-text-secondary)] font-medium"
+                >Email</label
+              >
+              <input
+                type="email"
+                id="email"
+                name="email"
+                class="input-onyx"
+                readonly
+              />
+            </div>
+            <div class="flex flex-col gap-1">
+              <label
+                class="text-sm text-[var(--onyx-text-secondary)] font-medium"
+                >Phone</label
+              >
+              <input
+                type="text"
+                id="phone"
+                name="phone"
+                class="input-onyx"
+                readonly
+              />
+            </div>
+            <div class="flex flex-col gap-1">
+              <label
+                class="text-sm text-[var(--onyx-text-secondary)] font-medium"
+                >Address</label
+              >
+              <input
+                type="text"
+                id="address"
+                name="address"
+                class="input-onyx"
+                readonly
+              />
+            </div>
+            <div class="flex flex-col gap-1">
+              <label
+                class="text-sm text-[var(--onyx-text-secondary)] font-medium"
+                >City</label
+              >
+              <input
+                type="text"
+                id="city"
+                name="city"
+                class="input-onyx"
+                readonly
+              />
+            </div>
+            <div class="flex flex-col gap-1">
+              <label
+                class="text-sm text-[var(--onyx-text-secondary)] font-medium"
+                >State</label
+              >
+              <input
+                type="text"
+                id="state"
+                name="state"
+                class="input-onyx"
+                readonly
+              />
+            </div>
+            <div class="flex flex-col gap-1">
+              <label
+                class="text-sm text-[var(--onyx-text-secondary)] font-medium"
+                >Country</label
+              >
+              <input
+                type="text"
+                id="country"
+                name="country"
+                class="input-onyx"
+                readonly
+              />
+            </div>
+            <div class="flex flex-col gap-1">
+              <label
+                class="text-sm text-[var(--onyx-text-secondary)] font-medium"
+                >Postal Code</label
+              >
+              <input
+                type="text"
+                id="postal_code"
+                name="postal_code"
+                class="input-onyx"
+                readonly
+              />
+            </div>
+            <div class="flex flex-col gap-1">
+              <label
+                class="text-sm text-[var(--onyx-text-secondary)] font-medium"
+                >Department</label
+              >
+              <p id="department" class="input-onyx-read">Loading...</p>
+            </div>
+            <div class="flex flex-col gap-1">
+              <label
+                class="text-sm text-[var(--onyx-text-secondary)] font-medium"
+                >Position</label
+              >
+              <p id="position" class="input-onyx-read">Loading...</p>
+            </div>
+          </div>
 
-      </form>
-    </section>
-
-  </main>
-
-</body>
+          <div class="flex flex-col sm:flex-row gap-3 mt-6">
+            <button
+              type="button"
+              id="edit-btn"
+              class="btn-onyx-primary flex-1 hover:scale-[1.03] hover:shadow-[0_6px_20px_rgba(37,99,235,0.25)] transition-all"
+            >
+              Edit Info
+            </button>
+            <button
+              type="button"
+              id="cancel-btn"
+              class="btn-onyx-secondary flex-1 hidden"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              id="save-btn"
+              class="btn-onyx-accent flex-1 hidden"
+            >
+              Save
+            </button>
+          </div>
+        </form>
+      </section>
+    </main>
+  </body>
 </html>

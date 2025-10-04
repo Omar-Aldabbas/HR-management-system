@@ -3,139 +3,192 @@ import { safeFetch } from "./helper/safeFetch.js";
 const body = document.body;
 
 const desktopNav = () => `
-<nav class="sticky top-0 left-0 right-0 bg-white text-black shadow-md flex items-center justify-between px-6 py-3 z-50">
-  <div class="flex items-center gap-4">
-    <img id="user-img" alt="User" class="w-10 h-10 bg-gray-300 rounded-full object-cover border-2 border-white shadow-sm" />
-    <div class="flex flex-col">
-      <button class="nav-btn text-left font-semibold text-black" data-page="profile">
-        <span id="user-name">Loading...</span>
-      </button>
-      <span class="text-sm text-gray-500" id="user-position">Loading...</span>
+<nav id="ionix-desktop-nav" class="fixed top-0 left-0 right-0 bg-white/80 backdrop-blur-md border-b border-[var(--onyx-border)] z-50">
+  <div class="container-onyx flex items-center justify-between px-4 py-3">
+    <div class="flex items-center gap-3">
+      <img id="user-img" alt="User" class="w-10 h-10 rounded-full object-cover border border-[var(--onyx-border)] shadow-sm" />
+      <div class="flex flex-col leading-tight">
+        <button class="nav-btn text-left text-[var(--onyx-text-primary)] font-semibold" data-page="profile"><span id="user-name">Loading...</span></button>
+        <span id="user-position" class="text-sm text-[var(--onyx-text-secondary)]">Loading...</span>
+      </div>
     </div>
-  </div>
-  <div class="hidden md:flex items-center gap-6 uppercase tracking-wider font-semibold">
-    <button class="nav-btn px-3 py-1 rounded transition-transform duration-200" data-page="home">Home</button>
-    <button class="nav-btn px-3 py-1 rounded transition-transform duration-200" data-page="attendance">Attendance</button>
-    <button class="nav-btn px-3 py-1 rounded transition-transform duration-200" data-page="analytics">Analytics</button>
-    <button class="nav-btn px-3 py-1 rounded transition-transform duration-200" data-page="expenses">Expenses</button>
-    <button class="nav-btn px-3 py-1 rounded transition-transform duration-200" data-page="leaves">Leaves</button>
-  </div>
-  <div class="flex items-center gap-3">
-    <button id="menu-btn" class="p-2 rounded hover:scale-105 transition-transform">
-      <i class="fa-solid fa-bars text-lg"></i>
+    <div class="hidden lg:flex items-center gap-6 uppercase tracking-wide font-medium">
+      <button class="nav-btn px-3 py-1 rounded-md" data-page="home">Home</button>
+      <button class="nav-btn px-3 py-1 rounded-md" data-page="attendance">Attendance</button>
+      <button class="nav-btn px-3 py-1 rounded-md" data-page="analytics">Analytics</button>
+      <button class="nav-btn px-3 py-1 rounded-md" data-page="expenses">Expenses</button>
+      <button class="nav-btn px-3 py-1 rounded-md" data-page="leaves">Leaves</button>
+    </div>
+    <button id="menu-btn" class="p-2 rounded-md focus:outline-none hover:text-blue-500 hover:scale-110 transition-all">
+      <i class="fa-solid fa-bars-staggered text-2xl"></i>
     </button>
   </div>
 </nav>
 `;
 
-const mobileNav = () => `
-<nav class="sticky bottom-0 left-0 right-0 bg-white text-black md:hidden shadow-t flex justify-around py-4 px-6 z-50 border-t border-gray-200">
-  <button class="nav-btn transition-transform duration-200 flex flex-col items-center" data-page="home"><i class="fa-solid fa-house text-lg"></i></button>
-  <button class="nav-btn transition-transform duration-200 flex flex-col items-center" data-page="attendance"><i class="fa-solid fa-clock text-lg"></i></button>
-  <button class="nav-btn transition-transform duration-200 flex flex-col items-center" data-page="analytics"><i class="fa-solid fa-clipboard-check text-lg"></i></button>
-  <button class="nav-btn transition-transform duration-200 flex flex-col items-center" data-page="expenses"><i class="fa-solid fa-dollar-sign text-lg"></i></button>
-  <button class="nav-btn transition-transform duration-200 flex flex-col items-center" data-page="leaves"><i class="fa-solid fa-calendar-days text-lg"></i></button>
-</nav>
+function injectNavStyles() {
+  const s = document.createElement("style");
+  s.innerHTML = `
+:root{--nav-accent:var(--onyx-accent-1);--nav-accent-2:var(--onyx-accent-2);--nav-text:var(--onyx-text-primary);--nav-muted:var(--onyx-text-secondary);--nav-surface:var(--onyx-bg-surface);--nav-border:var(--onyx-border);--nav-glow:var(--onyx-hover-glow)}
+.nav-btn{color:var(--nav-muted);padding:.35rem .6rem;border-radius:.5rem;transition:all .18s ease}
+.nav-btn:hover{color:var(--nav-accent);transform:translateY(-2px)}
+.nav-btn.nav-active{color:var(--nav-accent);font-weight:600}
+#ionix-desktop-nav .nav-btn.nav-active::after{content:'';display:block;height:3px;width:100%;background:linear-gradient(90deg,var(--nav-accent),var(--nav-accent-2));border-radius:4px;margin-top:.4rem}
+.menu-backdrop{position:fixed;inset:0;background:rgba(11,12,16,0.45);opacity:0;pointer-events:none;transition:opacity .18s ease;z:60}
+.menu-backdrop.open{opacity:1;pointer-events:auto}
+.menu-panel{position:fixed;inset:0;background:var(--nav-surface);color:var(--nav-text);transform:translateY(100%);transition:transform .3s cubic-bezier(.25,.9,.25,1),opacity .25s;opacity:0;z-index:70;display:flex;flex-direction:column;border-top:1px solid var(--nav-border)}
+.menu-panel.open{transform:translateY(0);opacity:1}
+.menu-panel .panel-header{display:flex;align-items:center;justify-between;padding:1rem 1.5rem;border-bottom:1px solid var(--nav-border)}
+.menu-panel .panel-title{display:flex;align-items:center;gap:.6rem;font-weight:700;color:var(--nav-accent)}
+.menu-panel .menu-list{flex:1;display:flex;flex-direction:column;padding:1rem;gap:.45rem;overflow:auto}
+.menu-item{display:flex;align-items:center;gap:.8rem;padding:.8rem;border-radius:.75rem;color:var(--nav-text);transition:background .12s,transform .12s;font-weight:500}
+.menu-item i{width:1.3rem;height:1.3rem;flex-shrink:0;color:var(--nav-accent)}
+.menu-item:hover{background:var(--nav-glow);transform:translateY(-2px)}
+#menu-close{background:none;color:var(--nav-text);border:1px solid var(--nav-border);padding:.5rem .75rem;border-radius:.5rem}
+@media(max-width:768px){
+  .menu-panel{width:100%;height:100vh;justify-content:flex-start;padding-top:4rem}
+  .menu-item{font-size:1.2rem;padding:1rem}
+  #menu-close{font-size:1.3rem}
+}
+@media(min-width:769px){
+  .menu-panel{width:50%;right:0;left:auto;border-left:1px solid var(--nav-border);border-top:none;height:100vh;transform:translateX(100%)}
+  .menu-panel.open{transform:translateX(0);opacity:1}
+  .menu-backdrop{background:rgba(0,0,0,0.35)}
+}
 `;
+  document.head.appendChild(s);
+}
 
-// commnt for unbuilt comp
-// notes, events emptypages
-const menuTemplate = (role) => {
-  let items = `
-    <li><a href="companydashboard.html" class="block px-4 py-3 rounded hover:bg-gray-100">Company Dashboard</a></li>
-    <li><a href="department.html" class="block px-4 py-3 rounded hover:bg-gray-100">Department</a></li>
-    <li><a href="faq.html" class="block px-4 py-3 rounded hover:bg-gray-100">FAQ</a></li>
-    <li><a href="notes.html" class="block px-4 py-3 rounded hover:bg-gray-100">Notes</a></li>
-    <li><a href="events.html" class="block px-4 py-3 rounded hover:bg-gray-100">Events</a></li>
-  `;
-  if (["manager"].includes(role)) items += `<li><a href="manager-tools.html" class="block px-4 py-3 rounded hover:bg-gray-100">Manage Tasks & Targets</a></li>`;
-  if (["hr","hr_manager","admin"].includes(role)) items += `<li><a href="hr-tools.html" class="block px-4 py-3 rounded hover:bg-gray-100">HR Tools</a></li>`;
-  if (role === "sales") items += `<li><a href="sales.html" class="block px-4 py-3 rounded hover:bg-gray-100">Sales</a></li>`;
-  items += `<li id="history-link" class="block px-4 py-3 rounded cursor-pointer flex items-center"><i class="fa-solid fa-message mr-2"></i>History</li>`;
-
+function desktopMenuHtml(itemsHtml) {
   return `
-  <div id="menu-container" class="fixed inset-0 bg-white z-50 transform scale-95 opacity-0 transition-all duration-300 overflow-auto hidden flex flex-col">
-    <div class="flex justify-between items-center p-4 border-b">
-      <span class="font-semibold text-lg">Menu</span>
-      <button id="close-menu" class="p-2 rounded hover:scale-105 transition-transform"><i class="fa-solid fa-xmark"></i></button>
-    </div>
-    <ul class="flex flex-col p-2 space-y-1">
-      ${items}
-    </ul>
-  </div>
+    <div class="menu-backdrop" id="menu-backdrop"></div>
+    <aside class="menu-panel hidden" id="menu-panel">
+      <div class="panel-header">
+        <div class="panel-title"><i class="fa-solid fa-compass"></i><span>Navigation</span></div>
+        <div class="flex items-center justify-between gap-3 w-full">
+          <div class="flex-1"></div>
+          <button id="menu-close"><i class="fa-solid fa-xmark text-xl"></i></button>
+        </div>
+      </div>
+      <div class="menu-list">
+        ${itemsHtml}
+        <a href="history.html" class="menu-item"><i class="fa-solid fa-clock-rotate-left"></i>History</a>
+      </div>
+    </aside>
   `;
-};
+}
 
-function styleNav() {
-  const currentPage = window.location.pathname.split('/').pop().replace('.html', '');
-  document.querySelectorAll('.nav-btn').forEach(btn => {
-    btn.classList.remove('active');
-    if (btn.dataset.page === currentPage) btn.classList.add('active');
+function buildItems(role) {
+  const base = [
+    { href: "home.html", icon: "fa-house", label: "Home" },
+    { href: "attendance.html", icon: "fa-clock", label: "Attendance" },
+    { href: "analytics.html", icon: "fa-chart-line", label: "Analytics" },
+    { href: "expenses.html", icon: "fa-wallet", label: "Expenses" },
+    { href: "leaves.html", icon: "fa-calendar-days", label: "Leaves" },
+    { href: "faq.html", icon: "fa-circle-question", label: "FAQ" },
+    { href: "notes.html", icon: "fa-note-sticky", label: "Notes" },
+    { href: "events.html", icon: "fa-calendar-check", label: "Events" },
+  ];
+  if (role === "manager")
+    base.push({ href: "manager-tools.html", icon: "fa-user-tie", label: "Manager Tools" });
+  if (["hr", "hr_manager", "admin"].includes(role))
+    base.push({ href: "hr-tools.html", icon: "fa-users-gear", label: "HR Tools" });
+  if (role === "sales")
+    base.push({ href: "sales.html", icon: "fa-chart-pie", label: "Sales" });
+  return base.map(i => `<a href="${i.href}" class="menu-item"><i class="fa-solid ${i.icon}"></i>${i.label}</a>`).join("");
+}
+
+function highlightActive() {
+  const current = window.location.pathname.split("/").pop().replace(".html", "");
+  document.querySelectorAll(".nav-btn").forEach((btn) => {
+    btn.classList.remove("nav-active");
+    if (btn.dataset.page === current) btn.classList.add("nav-active");
   });
 }
 
-function getNavs() {
-  document.querySelectorAll('.nav-btn').forEach(nav => {
-    nav.addEventListener("click", () => {
-      window.location.href = `${nav.dataset.page}.html`;
-    });
+function bindNavClicks() {
+  document.querySelectorAll(".nav-btn").forEach((el) => {
+    el.removeEventListener("click", navClickHandler);
+    el.addEventListener("click", navClickHandler);
   });
 }
 
-async function populateUser() {
+function navClickHandler(e) {
+  const b = e.currentTarget;
+  const page = b.dataset.page;
+  if (!page) return;
+  window.location.href = `${page}.html`;
+}
+
+async function fetchUserAndWire() {
   try {
-    const apiBase = 'http://localhost/HR-project/api';
-    const resRaw = await fetch(`${apiBase}/personal-data.php`, {
-      method: 'POST',
-      body: JSON.stringify({ action: 'get' }),
-      credentials: 'include',
-      headers: { 'Content-Type': 'application/json' }
+    const apiBase = "http://localhost/HR-project/api";
+    const resp = await fetch(`${apiBase}/personal-data.php`, {
+      method: "POST",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "get" }),
     });
-    const res = await resRaw.json();
-    if (!res.success || !res.data) {
-      if (!window.location.pathname.endsWith('auth.html')) window.location.href = 'auth.html';
+    const data = await resp.json();
+    if (!data.success || !data.data) {
+      if (!window.location.pathname.endsWith("auth.html"))
+        window.location.href = "auth.html";
       return;
     }
-    const user = res.data;
-    const nameEl = document.getElementById('user-name');
-    const positionEl = document.getElementById('user-position');
-    const avatarEl = document.getElementById('user-img');
-    if (nameEl) nameEl.textContent = user.full_name || 'User';
-    if (positionEl) positionEl.textContent = user.position || 'Employee';
-    if (avatarEl) {
-      avatarEl.src = user.avatar && user.avatar.trim() !== ''
-        ? `${apiBase.replace('/api','')}/${user.avatar.replace(/^\/+/, '')}` 
-        : 'http://localhost/HR-project/uploads/avatars/default.png';
-    }
-
-    body.insertAdjacentHTML("beforeend", menuTemplate(user.role || 'employee'));
-    const menuBtn = document.getElementById("menu-btn");
-    const container = document.getElementById("menu-container");
-    const closeMenu = document.getElementById("close-menu");
-    const historyLink = document.getElementById("history-link");
-
-    if (menuBtn && container) {
-      menuBtn.addEventListener("click", () => {
-        container.classList.remove("hidden");
-        setTimeout(() => container.classList.remove("scale-95","opacity-0"), 10);
-      });
-      closeMenu.addEventListener("click", () => {
-        container.classList.add("scale-95","opacity-0");
-        setTimeout(() => container.classList.add("hidden"), 200);
-      });
-      historyLink.addEventListener("click", () => window.location.href="history.html");
-    }
-
-  } catch (err) {
-    console.error('Error fetching user:', err);
-    if (!window.location.pathname.endsWith('auth.html')) window.location.href = 'auth.html';
+    const user = data.data;
+    const nameEl = document.getElementById("user-name");
+    const posEl = document.getElementById("user-position");
+    const imgEl = document.getElementById("user-img");
+    if (nameEl) nameEl.textContent = user.full_name || "User";
+    if (posEl) posEl.textContent = user.position || "Employee";
+    if (imgEl)
+      imgEl.src =
+        user.avatar && user.avatar.trim()
+          ? `${apiBase.replace("/api", "")}/${user.avatar.replace(/^\/+/, "")}`
+          : "http://localhost/HR-project/uploads/avatars/default.png";
+    const items = buildItems(user.role || "employee");
+    body.insertAdjacentHTML("beforeend", desktopMenuHtml(items));
+    wireMenu();
+    highlightActive();
+  } catch {
+    if (!window.location.pathname.endsWith("auth.html"))
+      window.location.href = "auth.html";
   }
 }
 
+function wireMenu() {
+  const menuBtn = document.getElementById("menu-btn");
+  const menuPanel = document.getElementById("menu-panel");
+  const menuBackdrop = document.getElementById("menu-backdrop");
+  const menuClose = document.getElementById("menu-close");
+  menuBtn && menuBtn.addEventListener("click", () => openMenu(menuPanel, menuBackdrop));
+  menuClose && menuClose.addEventListener("click", () => closeMenu(menuPanel, menuBackdrop));
+  menuBackdrop && menuBackdrop.addEventListener("click", () => closeMenu(menuPanel, menuBackdrop));
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") closeMenu(menuPanel, menuBackdrop);
+  });
+}
+
+function openMenu(panel, backdrop) {
+  panel && panel.classList.add("open");
+  backdrop && backdrop.classList.add("open");
+  panel && panel.classList.remove("hidden");
+  document.documentElement.style.overflow = "hidden";
+}
+
+function closeMenu(panel, backdrop) {
+  panel && panel.classList.remove("open");
+  backdrop && backdrop.classList.remove("open");
+  setTimeout(() => {
+    panel && panel.classList.add("hidden");
+  }, 260);
+  document.documentElement.style.overflow = "";
+}
+
 document.addEventListener("DOMContentLoaded", () => {
+  injectNavStyles();
   body.insertAdjacentHTML("afterbegin", desktopNav());
-  body.insertAdjacentHTML("beforeend", mobileNav());
-  styleNav();
-  getNavs();
-  populateUser();
+  highlightActive();
+  bindNavClicks();
+  fetchUserAndWire();
 });

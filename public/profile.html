@@ -1,77 +1,189 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Profile</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
-  <link rel="stylesheet" href="css/custom.css" />
-  <script type="module" src="js/profile.js" defer></script>
-</head>
-<body class="bg-gray-100 text-gray-900 min-h-screen flex flex-col">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Profile</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <link rel="stylesheet" href="css/custom.css" />
+    <script type="module" src="js/profile.js" defer></script>
+  </head>
 
-  <header class="sticky top-0 left-0 z-10 flex items-center bg-blue-900 text-white shadow-md px-4 py-3">
-    <button onclick="window.history.back()" class="text-white hover:text-gray-200">
-      <i class="fa-solid fa-chevron-left text-lg"></i>
-    </button>
-    <h1 class="flex-1 text-center text-2xl font-bold tracking-widest">PROFILE</h1>
-    <div class="w-6"></div>
-  </header>
+  <body
+    class="bg-[var(--onyx-bg-base)] text-[var(--onyx-text-primary)] font-['Plus_Jakarta_Sans'] min-h-screen flex flex-col"
+  >
+    <header
+      class="fixed top-0 left-0 w-full z-50 flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 transition-all duration-300 bg-[rgba(255,255,255,0.3)] backdrop-blur-sm"
+    >
+      <button
+        onclick="window.history.back()"
+        class="text-[var(--onyx-text-primary)] hover:text-[var(--onyx-accent-1)] transition"
+      >
+        <i class="fa-solid fa-chevron-left text-lg sm:text-xl"></i>
+      </button>
+      <h1
+        class="text-lg sm:text-xl md:text-2xl font-semibold text-center flex-1 text-[var(--onyx-text-primary)]"
+      >
+        Profile
+      </h1>
+      <div class="w-6 sm:w-8"></div>
+    </header>
 
-  <main class="flex-1 container mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+    <main class="flex-1 w-full pt-24 pb-10 px-4 sm:px-6 lg:px-8 space-y-10">
+      <section
+        class="card-onyx max-w-3xl mx-auto text-center fade-in px-4 py-8 sm:px-8 sm:py-10"
+      >
+        <div class="relative inline-block">
+          <img
+            id="user-img"
+            src=""
+            alt="User"
+            class="w-24 h-24 sm:w-28 sm:h-28 md:w-32 md:h-32 rounded-full border-4 border-[var(--onyx-border)] bg-[var(--onyx-bg-surface)] shadow-md object-cover transition-transform duration-300 hover:scale-105"
+          />
+          <div
+            class="absolute -bottom-1 right-0 bg-[var(--onyx-accent-1)] w-4 h-4 rounded-full border-2 border-[var(--onyx-bg-surface)]"
+          ></div>
+        </div>
+        <h2
+          id="user-name"
+          class="mt-5 text-xl sm:text-2xl font-semibold text-[var(--onyx-text-primary)]"
+        >
+          Loading...
+        </h2>
+        <p
+          id="user-position"
+          class="text-[var(--onyx-text-secondary)] text-sm sm:text-base mt-1"
+        >
+          Loading...
+        </p>
+      </section>
 
-    <section class="bg-white p-6 rounded-lg shadow-lg max-w-4xl mx-auto text-center">
-      <div class="relative inline-block">
-        <img id="user-img" src="" alt="User" class="w-28 h-28 rounded-full border-4 bg-gray-300 border-gray-200 shadow-lg object-cover">
-        <div class="absolute -bottom-1 right-0 bg-green-500 w-4 h-4 rounded-full border-2 border-white"></div>
-      </div>
-      <h2 id="user-name" class="mt-4 text-xl font-semibold text-gray-800">Loading...</h2>
-      <p id="user-position" class="text-gray-500 text-sm mt-1">Loading...</p>
-    </section>
+      <section
+        class="card-onyx max-w-3xl mx-auto fade-in px-4 py-6 sm:px-8 sm:py-8"
+      >
+        <h2
+          class="text-lg sm:text-xl font-semibold mb-6 border-b border-[var(--onyx-border)] pb-2"
+        >
+          Contact
+        </h2>
+        <div
+          class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 text-sm sm:text-base"
+        >
+          <div class="flex flex-col">
+            <span class="text-[var(--onyx-text-secondary)] font-medium mb-1"
+              >Name</span
+            >
+            <span
+              id="contact-name"
+              class="font-semibold text-[var(--onyx-text-primary)]"
+              >Loading...</span
+            >
+          </div>
+          <div class="flex flex-col">
+            <span class="text-[var(--onyx-text-secondary)] font-medium mb-1"
+              >Email</span
+            >
+            <span
+              id="contact-email"
+              class="font-semibold text-[var(--onyx-text-primary)] break-all"
+              >Loading...</span
+            >
+          </div>
+          <div class="flex flex-col">
+            <span class="text-[var(--onyx-text-secondary)] font-medium mb-1"
+              >Phone</span
+            >
+            <span
+              id="contact-phone"
+              class="font-semibold text-[var(--onyx-text-primary)]"
+              >Loading...</span
+            >
+          </div>
+        </div>
+      </section>
 
-    <section class="bg-white p-6 rounded-lg shadow-lg max-w-4xl mx-auto">
-      <h2 class="text-lg font-semibold mb-4">Contact</h2>
-      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-        <p><strong>Name:</strong> <span id="contact-name">Loading...</span></p>
-        <p><strong>Email:</strong> <span id="contact-email">Loading...</span></p>
-        <p><strong>Phone:</strong> <span id="contact-phone">Loading...</span></p>
-      </div>
-    </section>
+      <section
+        class="card-onyx max-w-3xl mx-auto fade-in px-4 py-6 sm:px-8 sm:py-8"
+      >
+        <h2
+          class="text-lg sm:text-xl font-semibold mb-6 border-b border-[var(--onyx-border)] pb-2"
+        >
+          Account
+        </h2>
+        <div class="flex flex-col divide-y divide-[var(--onyx-border)]">
+          <button
+            class="btn-h group flex justify-between items-center py-4 px-2 sm:px-4 hover:bg-[var(--onyx-hover-glow)] rounded-xl transition"
+            data-page="personal-data.html"
+          >
+            <span
+              class="font-medium text-[var(--onyx-text-primary)] group-hover:text-[var(--onyx-accent-1)]"
+              >Personal Data</span
+            >
+            <i
+              class="fa-solid fa-chevron-right text-[var(--onyx-text-secondary)] group-hover:text-[var(--onyx-accent-1)]"
+            ></i>
+          </button>
+          <button
+            class="btn-h group flex justify-between items-center py-4 px-2 sm:px-4 hover:bg-[var(--onyx-hover-glow)] rounded-xl transition"
+            data-page="payrolls.html"
+          >
+            <span
+              class="font-medium text-[var(--onyx-text-primary)] group-hover:text-[var(--onyx-accent-1)]"
+              >Payroll & Taxes</span
+            >
+            <i
+              class="fa-solid fa-chevron-right text-[var(--onyx-text-secondary)] group-hover:text-[var(--onyx-accent-1)]"
+            ></i>
+          </button>
+          <button
+            class="btn-h group flex justify-between items-center py-4 px-2 sm:px-4 hover:bg-[var(--onyx-hover-glow)] rounded-xl transition"
+            data-page="alerts.html"
+          >
+            <span
+              class="font-medium text-[var(--onyx-text-primary)] group-hover:text-[var(--onyx-accent-1)]"
+              >Alerts</span
+            >
+            <i
+              class="fa-solid fa-chevron-right text-[var(--onyx-text-secondary)] group-hover:text-[var(--onyx-accent-1)]"
+            ></i>
+          </button>
+        </div>
+      </section>
 
-    <section class="bg-white p-6 rounded-lg shadow-lg max-w-4xl mx-auto">
-      <h2 class="text-lg font-semibold mb-4">Account</h2>
-      <div class="flex flex-col divide-y divide-gray-200">
-        <button class="btn-h text-left py-3 flex items-center justify-between hover:bg-gray-50 transition" data-page="personal-data.html">
-          <span class="font-medium text-gray-800">Personal Data</span>
-          <i class="fa-solid fa-chevron-right text-gray-400"></i>
-        </button>
-        <button class="btn-h text-left py-3 flex items-center justify-between hover:bg-gray-50 transition" data-page="payrolls.html">
-          <span class="font-medium text-gray-800">Payroll & Taxes</span>
-          <i class="fa-solid fa-chevron-right text-gray-400"></i>
-        </button>
-        <button class="btn-h text-left py-3 flex items-center justify-between hover:bg-gray-50 transition" data-page="alerts.html">
-          <span class="font-medium text-gray-800">Alerts</span>
-          <i class="fa-solid fa-chevron-right text-gray-400"></i>
-        </button>
-      </div>
-    </section>
-
-    <section class="bg-white p-6 rounded-lg shadow-lg max-w-4xl mx-auto">
-      <h2 class="text-lg font-semibold mb-4">Settings</h2>
-      <div class="flex flex-col divide-y divide-gray-200">
-        <button class="btn-h text-left py-3 flex items-center justify-between hover:bg-gray-50 transition" data-page="change-password.html">
-          <span class="font-medium text-gray-800">Change Password</span>
-          <i class="fa-solid fa-chevron-right text-gray-400"></i>
-        </button>
-        <button id="logout-btn" class="text-left py-3 flex items-center justify-between text-red-600 hover:bg-red-50 transition">
-          <span class="font-medium">Logout</span>
-          <i class="fa-solid fa-arrow-right-from-bracket"></i>
-        </button>
-      </div>
-    </section>
-
-  </main>
-
-</body>
+      <section
+        class="card-onyx max-w-3xl mx-auto fade-in px-4 py-6 sm:px-8 sm:py-8"
+      >
+        <h2
+          class="text-lg sm:text-xl font-semibold mb-6 border-b border-[var(--onyx-border)] pb-2"
+        >
+          Settings
+        </h2>
+        <div class="flex flex-col divide-y divide-[var(--onyx-border)]">
+          <button
+            class="btn-h group flex justify-between items-center py-4 px-2 sm:px-4 hover:bg-[var(--onyx-hover-glow)] rounded-xl transition"
+            data-page="change-password.html"
+          >
+            <span
+              class="font-medium text-[var(--onyx-text-primary)] group-hover:text-[var(--onyx-accent-1)]"
+              >Change Password</span
+            >
+            <i
+              class="fa-solid fa-chevron-right text-[var(--onyx-text-secondary)] group-hover:text-[var(--onyx-accent-1)]"
+            ></i>
+          </button>
+          <button
+            id="logout-btn"
+            class="flex justify-between items-center py-4 px-2 sm:px-4 text-red-600 hover:bg-red-50 hover:text-red-700 transition rounded-xl"
+          >
+            <span class="font-medium">Logout</span>
+            <i class="fa-solid fa-arrow-right-from-bracket"></i>
+          </button>
+        </div>
+      </section>
+    </main>
+  </body>
 </html>

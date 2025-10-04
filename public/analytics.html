@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Analytics Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <link rel="stylesheet" href="css/custom.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>
+  <script type="module" src="./js/navigation.js" defer></script>
+  <script type="module" src="./js/analytics.js" defer></script>
+</head>
+
+<body class="bg-gradient-to-br from-gray-50 to-gray-100 text-gray-900 font-sans min-h-screen flex flex-col">
+  <header class="bg-blue-800 text-white py-5 shadow-md">
+    <div class="container mx-auto text-center">
+      <h1 class="text-3xl font-bold tracking-tight">Analytics Dashboard</h1>
+      <p class="text-sm text-blue-100 mt-1">Your performance overview</p>
+    </div>
+  </header>
+
+  <main id="analytics-content" class="flex-1 container mx-auto px-4 py-8">
+    <div id="loading" class="text-center text-gray-500 text-lg py-10">Loading analytics...</div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6">
+      <section class="bg-white rounded-2xl shadow-md border border-gray-200 p-5 transition hover:shadow-lg">
+        <h2 class="text-base font-semibold mb-3 flex items-center gap-2 text-gray-700">
+          <i class="fa-solid fa-calendar-check text-blue-700"></i>
+          Attendance
+        </h2>
+        <div class="h-48 flex items-center justify-center">
+          <canvas id="attendanceChart"></canvas>
+        </div>
+      </section>
+
+      <section class="bg-white rounded-2xl shadow-md border border-gray-200 p-5 transition hover:shadow-lg">
+        <h2 class="text-base font-semibold mb-3 flex items-center gap-2 text-gray-700">
+          <i class="fa-solid fa-clipboard-check text-yellow-600"></i>
+          Tasks
+        </h2>
+        <div class="h-48 flex items-center justify-center">
+          <canvas id="tasksChart"></canvas>
+        </div>
+      </section>
+
+      <section class="bg-white rounded-2xl shadow-md border border-gray-200 p-5 transition hover:shadow-lg">
+        <h2 class="text-base font-semibold mb-3 flex items-center gap-2 text-gray-700">
+          <i class="fa-solid fa-leaf text-emerald-600"></i>
+          Leaves
+        </h2>
+        <div class="h-48 flex items-center justify-center">
+          <canvas id="leavesChart"></canvas>
+        </div>
+      </section>
+
+      <section class="bg-white rounded-2xl shadow-md border border-gray-200 p-5 transition hover:shadow-lg">
+        <h2 class="text-base font-semibold mb-3 flex items-center gap-2 text-gray-700">
+          <i class="fa-solid fa-chart-line text-purple-700"></i>
+          Performance
+        </h2>
+        <div class="h-48 flex items-center justify-center">
+          <canvas id="performanceChart"></canvas>
+        </div>
+      </section>
+    </div>
+  </main>
+</body>
+</html>
